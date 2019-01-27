@@ -1,0 +1,686 @@
+This file contains a walkthrough of our improved game. To begin, let's run the
+game. (In this file, I use $ instead of my more-usual % for the unix prompt):
+
+$ source pa3.sh
+$ game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>
+
+So far, no difference from the previous programming assignment. But now we can
+use objects (previously, none of our commands had objects. We even had to use
+"getall" instead of "get all", just to get around the problem). So, let's look
+at some objects:
+
+> x gold
+I see nothing special about that.
+> i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+> x life
+It says S. S. Minnow.
+> x key
+I see nothing special about that.
+>
+
+From the above, we see that we can examine objects that are either in my
+inventory (the life preserver and the key) or in my current room (the gold).
+The displayed text for these objects are the contents of their files.
+
+Let's explore some more:
+> e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+> x gold
+I cannot see that here.
+> x dfgdfgfdg
+I cannot see that here.
+> w
+Misty Room
+Here there is:
+A gold bar
+>
+
+Here, we see that we cannot examine objects that are in other rooms. We also
+can't see things that aren't objects (eg, dfgdfgfdg) -- the output in this case
+is different from the original game, because the game would say that dfgdfgfdg
+is not an object. Essentially, it works the same as the original game, however
+(and I designed it this way just to make the assignment a little easier)
+
+Now let's pick up and drop some objects:
+
+> get gold
+You pick up the gold
+> drop life
+Dropped.
+> i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A gold bar
+A brass key
+A slip of paper
+A shovel
+> e
+Cave E/W passage
+> x gold
+I see nothing special about that.
+> w
+Misty Room
+Here there is:
+A life preserver
+> get preserver
+You pick up the preserver
+> drop gold
+Dropped.
+>
+
+So, we see that we can drop and pick up objects. Note that two of the objects
+(the floppy/drive and the life/preserver) need to be dropped as a pair. I mean,
+if you move the floppy file but not the drive file (or visa-versa) then the
+game will get confused about whether you have the object or not.
+
+Let's explore a little more:
+> e
+Cave E/W passage
+> w
+Misty Room
+> w
+You cannot go that way.
+> e
+Cave E/W passage
+> e
+N/S/W Junction
+You are at the junction of two passages. One goes north/south, and
+the other goes west.
+> n
+North end of cave passage
+You are at the north end of a north/south passageway.  There are stairs
+leading down from here.  There is also a door leading west.
+> w
+You must type a 3 digit combination code to enter this room.
+Enter it here: 123
+Sorry, that combination is incorrect.
+You cannot go that way.
+> look
+North end of cave passage
+You are at the north end of a north/south passageway.  There are stairs
+leading down from here.  There is also a door leading west.
+>
+
+Here, we see that the room at ~/pa3/start/e/e/n/w is "locked". This effect is
+achieved by making the directory not executable. It looks like we're not going
+to be able to get into this room unless we find the passcode. So, in the
+meantime, let's key exploring:
+
+> d
+Bedroom
+You are in what appears to be a worker's bedroom.  There is a queen-
+sized bed in the middle of the room, and a painting hanging on the
+wall.  A door leads to another room to the south, and stairways
+lead up and down.
+> x painting
+It is a velvet painting of Elvis Presley.  It seems to be nailed to the
+wall, and you cannot move it.
+> get painting
+You cannot pick that up.
+> x bed
+It is a queen sized bed, with a very firm mattress.
+> s
+Bathroom
+You are in a bathroom built for workers in the cave.  There is a
+urinal hanging on the wall, and some exposed pipes on the opposite
+wall where a sink used to be.  To the north is a bedroom.
+> x bed
+I cannot see that here.
+> x lklgfmlda
+I cannot see that here.
+> x urinal
+The urinal is very clean compared with everything else in the cave.  There
+isn't even any rust.  Upon close examination you realize that the drain at the
+bottom is missing, and there is just a large hole leading down the
+pipes into nowhere.  The hole is too small for a person to fit in.  The
+flush handle is so clean that you can see your reflection in it.
+>
+
+Here, we see that some objects can be examined even though they cannot be
+picked up. But we also see that they cannot be examined in the wrong room.
+We also notice that the urinal's handle appears to be frequently used. Maybe
+that's a clue that we should flush it:
+
+> flush
+Whoooosh!!
+
+You have scored 0 points out of 90 possible points.
+>
+
+Oh. So this seems to be where we put our treasures. (The original game doesn't
+print the score if you don't make points, but my way is easier and, I think,
+better.) Well, let's give it a try then:
+
+> put gold
+You don't have that.
+> i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+> put bracelet
+You must supply an indirect object.
+> put bracelet in
+You must supply an indirect object.
+> put bracelet gold
+You must supply an indirect object.
+> put bracelet in gold
+that indirect object is not here.
+> put bracelet in key
+I don't know how to combine those objects. Perhaps you should
+just try dropping it.
+> put bracelet in urinal
+You hear it plop down in some water below.
+>
+
+In the above, we see how the put command works, and what error messages it
+gives in different situations. Now, at this point, we have put the bracelet
+(which we suspect is a treasure, into the place that we suspect we are meant
+to put treasures. So let's see what happens when we flush:
+
+> flush
+Whoooosh!!
+
+You have scored 10 points out of 90 possible points.
+> i
+You currently have:
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+>
+
+Yep, that is the function of the urinal. Each treasure is worth 10 points. But
+you only get the points when you flush the urinal.
+
+Well, let's try some more things with the urinal:
+> n
+Bedroom
+> put paper in urinal
+that indirect object is not here.
+> s
+Bathroom
+> put paper in urinal
+You hear it plop down in some water below.
+> put disk in urinal
+You hear it plop down in some water below.
+> put life sdfsdfdsfsdfvvfdbfdb urinal  sddfsdfdsf rgrgrgr grg 
+You hear it plop down in some water below.
+> i
+You currently have:
+A diamond
+A brass key
+A shovel
+> flush
+Whoooosh!!
+
+You have scored 10 points out of 90 possible points.
+>
+
+From the above, we see that these items are not treasures, and they give us no
+points. (The actual treasures are: bracelet, diamond, gold, and platinum.)
+We also see that objects are unrecoverable once they are dropped in the 
+urinal -- that is, even if you haven't flushed it yet. This is just like the
+actual game.
+
+We also see that "put life sdfsdfdsfsdfvvfdbfdb urinal  sddfsdfdsf rgrgrgr grg"
+works just as well as "put life in urinal". This is because the original game
+doesn't check the third argument or care if there are extra arguments.
+
+Now, in the above walkthrough, we've ruined our game, because we need the
+floppy disk. So let's restart:
+
+> quit
+You have scored 10 points out of 90 possible points.
+$ source pa3.sh
+$ game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> score
+You have scored 0 points out of 90 possible points.
+>
+
+Notice that the "quit" command displays the score and also changes the prompt
+(among other things). The "score" command on the other hand, just displays the
+score.
+
+Well, now, let's not waste the time of walking through the game. let's instead
+take a short cut to go to where I know that we can find the passcode for the
+door.
+
+> cd ~/pa3/start/e/e/n/d/d/sw/w/d/e/.d/s/s/s
+> look
+PC area
+You have reached a dead end.  There is a PC on the floor here.  Above
+it is a sign that reads:
+          Type the reset command to type on the PC.
+A hole leads north.
+> x pc
+It is a personal computer that has only one floppy disk drive.
+> x drive
+It is a personal computer that has only one floppy disk drive.
+> reset
+Boot sector not found
+>
+
+There is a PC in this room. But it seems to be broken. Actually, if you were
+old enough to have used an old PC, then you would understand what "boot sector"
+means. It means that the PC doesn't have a hard drive; it needs a floppy disk
+to boot from. Fortunately, we have a floppy:
+
+> put bracelet in drive
+You can't put that in the PC!
+> put floppy in ibm
+> i
+You currently have:
+A bracelet
+A diamond
+A brass key
+A slip of paper
+A life preserver
+A shovel
+> look
+PC area
+You have reached a dead end.  There is a PC on the floor here.  Above
+it is a sign that reads:
+          Type the reset command to type on the PC.
+A hole leads north.
+>
+
+From this, we see that only the floppy/disk can be put into the PC/ibm/drive.
+When it is put into the PC, then the floppy is gone (just like in the real
+game). But maybe "reset" will work now:
+
+> reset
+Current time is 3:20:45
+Enter new time:
+
+What is this? Well, it's waiting for you to type a new time. This is how these
+old PCs were. Everyone would just hit enter. In fact, you can type anything and
+the game will accept it:
+
+> reset
+Current time is 3:20:45
+Enter new time: gfdgdfg
+A>
+
+Now, something else needs to be noticed. The current time is actually the real
+current time of your system. (It was 3:20:45 in the afternoon when I wrote ran
+this.) So we now have a PC prompt. What can we do with that?
+
+A> fgfdgf
+Bad command or file name
+A> ls
+Bad command or file name
+A>
+
+It turns out that we can't do much without knowing dos commands. Dos is not
+unix; instead of "ls", dos uses "dir":
+
+A> dir
+
+ Volume in drive A is FOO
+ Volume Serial Number is 1A16-08C9
+ Directory of A:\
+
+COMMAND  COM     47845 04-09-91   2:00a
+FOO      TXT        40 01-20-93   1:01a
+        2 file(s)      47845 bytes
+                     1065280 bytes free
+
+A>
+
+So, there are two files stored on the floppy disk. I wonder what we can do with
+them?
+
+A> command.com
+Bad command or file name
+A> cat command.com
+Bad command or file name
+A> type command.com
+Cannot type binary files
+A>
+
+Well, now we are getting somewhere. "Type" is the dos equivalent of unix of
+"cat". Command.com is a binary file, but foo.txt isn't. Let's see:
+
+A> type foo.txt
+
+The combination is 869.
+A>
+
+OK. So now we have the passcode. Notice also that dos isn't case sensitive.
+So, how can we finish, now that we have what we want? Use "exit":
+
+A> exit
+
+You power down the machine and step back.
+
+> n
+South end of long hallway
+You are at the south end of a long north/south hallway.  There is a hole
+to the south.
+> n
+3/4 south
+You are 3/4 of the way towards the south end of a long north/south hallway.
+> n
+Long n/s hallway
+You are in the middle of a long north/south hallway.
+> n
+3/4 north
+You are 3/4 of the way towards the north end of a long north/south hallway.
+> n
+North end of long hallway
+You are at the north end of a long north/south hallway.  There are stairs
+leading upwards.
+> u
+Stair landing
+You are at a landing in a stairwell which continues up and down.
+Here there is:
+A box with a slit in it, bolted to the wall.
+> x box
+The box has a slit in the top of it, and on it, in sloppy handwriting, is
+written: 'For key upgrade, put key in here.'
+> put gold in box
+You don't have that.
+> put paper in box
+You can't put that in the key box!
+> put key in box
+As you drop the key, the box begins to shake. Finally it explodes
+with a bang. The key seems to have vanished!
+> i
+You currently have:
+A bracelet
+A diamond
+A slip of paper
+A life preserver
+A shovel
+> look
+Stair landing
+You are at a landing in a stairwell which continues up and down.
+> x box
+I cannot see that here.
+>
+
+Well, the key is gone. (The upgraded key would reappear, if we implemented the
+next level of the game.) The box is gone too. Let's keep going:
+
+> u
+Up/down staircase
+You are at the continuation of an up/down staircase.
+> u
+Top of staircase
+You are at the top of a staircase leading down.  A crawlway leads off
+to the northeast.
+> ne
+NE crawlway
+You are in a crawlway that leads northeast or southwest.
+> ne
+Small crawlspace
+You are in a small crawlspace.  There is a hole in the ground here, and
+a small passage back to the southwest.
+Here there is:
+An axe
+> get axe
+You pick up the axe
+> d
+N/S/W Junction
+You are at the junction of two passages. One goes north/south, and
+the other goes west.
+> n
+North end of cave passage
+You are at the north end of a north/south passageway.  There are stairs
+leading down from here.  There is also a door leading west.
+>
+
+OK. So we found our way back to the locked room. (And we have the axe, which
+we'll need in this room.) But let's drop the axe first, and see what happens:
+
+> drop axe
+Dropped.
+> w
+You must type a 3 digit combination code to enter this room.
+Enter it here: 869
+Gamma computing center
+You are in the Gamma Computing Center.  An IBM 3090/600s is whirring
+away in here.  There is an ethernet cable coming out of one of the units,
+and going through the ceiling.  There is no console here on which you
+could type.
+> x cable
+I see nothing special about that.
+> x computer
+I see nothing special about that.
+> cut cable
+You have nothing with which to break things.
+>
+
+Oh. So we need the axe (the shovel doesn't cut it). Let's go get the axe:
+> e
+North end of cave passage
+Here there is:
+An axe
+> get axe
+You pick up the axe
+> w
+You must type a 3 digit combination code to enter this room.
+Enter it here: 869
+Gamma computing center
+>
+
+See that the door has been reshut and so it had to be passcoded again. Now
+let's finish the game:
+
+> cut cable with fdgfhfgh
+As you break the ethernet cable, everything starts to blur. You collapse
+for a moment, then straighten yourself up.
+
+Connection closed.
+
+Congratulations. You finished the level. Now, type "quit" to finish.
+> quit
+You have scored 0 points out of 90 possible points.
+$
+
+Notice that we didn't need to say "cut cable with axe". The game only looks for
+"cut cable". Everything else is ignored.
+
+OK, now. Let's look at something else about cut:
+$ source pa3.sh
+$ game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> cd e/e/n/d/d/sw/w/d/e/.d/n/n/u/u/u/ne/ne/
+> look
+Small crawlspace
+You are in a small crawlspace.  There is a hole in the ground here, and
+a small passage back to the southwest.
+Here there is:
+An axe
+> get axe
+You pick up the axe
+> cut hghg
+I don't see that here.
+> cd ../../../..
+> look
+Stair landing
+You are at a landing in a stairwell which continues up and down.
+There is a box with a slit in it, bolted to the wall here.
+Here there is:
+A box with a slit in it, bolted to the wall.
+> cut box
+Your axe shatters into a million pieces.
+> i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+> quit
+You have scored 0 points out of 90 possible points.
+$
+
+In the above, we see that the axe cannot be used on objects that aren't
+present. If, however, you use it on an object that is present, the axe is
+destroyed, rather than the thing you use it on. This is, oddly, how the
+original game works. 
+
+There is one more thing to consider. The red room has a hole hidden by a towel:
+
+
+
+Let us think some more about prepositions:
+
+$ source pa3.sh
+$ game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+> e
+N/S/W Junction
+You are at the junction of two passages. One goes north/south, and
+the other goes west.
+> n
+North end of cave passage
+You are at the north end of a north/south passageway.  There are stairs
+leading down from here.  There is also a door leading west.
+> d
+Bedroom
+You are in what appears to be a worker's bedroom.  There is a queen-
+sized bed in the middle of the room, and a painting hanging on the
+wall.  A door leads to another room to the south, and stairways
+lead up and down.
+> d
+NE end of NE/SW cave passage
+You are at the northeast end of a northeast/southwest passageway.
+Stairs lead up out of sight.
+> sw
+NE/SW-E/W junction
+You are at the junction of northeast/southwest and east/west passages.
+> w
+West end of E/W cave passage
+You are at the west end of an E/W passage.  There is a hole on the ground
+which leads down out of sight.
+> d
+Empty room
+You are in a room which is completely empty.  Doors lead out to the north
+and east.
+> e
+Red room
+You are in an empty room.  Interestingly enough, the stones in this room
+are painted red.  Doors lead out to the west and north.
+Here there is:
+A beach towel
+> n
+Yellow room
+You are in an empty room.  Interestingly enough, the stones in this
+room are painted yellow.  Doors lead out to the south and west.
+> w
+Blue room
+You are in an empty room.  Interestingly enough, the stones in this
+room are painted blue.  Doors lead out to the east and south.
+> s
+Empty room
+> e
+Red room
+Here there is:
+A beach towel
+> x towel
+It has a picture of snoopy on it.
+> d
+You cannot go that way.
+> get towel
+You pick up the towel
+Taking the towel reveals a hole in the floor.
+> w
+Empty room
+> e
+Red room
+Here there is:
+a hole in the floor
+> i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+A beach towel
+> d
+Long n/s hallway
+You are in the middle of a long north/south hallway.
+> pwd
+/home/user/pa3/start/e/e/n/d/d/sw/w/d/e/d
+>
+
+So, once we get the towel, the hole is revealed. And it has to indicate its
+presence, even when re-entering the room. We cannot go down until the hole is
+revealed. That is why line 522 above had said:
+> cd e/e/n/d/d/sw/w/d/e/.d/n/n/u/u/u/ne/ne/
+
+Notice the ".d" in this path. Since we were jumping ahead to the place where
+the axe was, we had not picked up the towel. So the down directory was still
+hidden.
+But the pwd back on line 654 gave "/home/user/pa3/start/e/e/n/d/d/sw/w/d/e/d"
+Notice that the final directory in this path is "d", not ".d". This is because
+we really went down the hole, after removing the towel.
+
+Let's also notice that the directory tree of the rooms has a little difference:
+
+$ ls ~/pa3
+holdkey  holdtreasure  items  start  treasures
+$
+
+The above five items are all directories. Their meanings are:
+  holdkey: This directory is used for only one purpose. Holding the key if it
+           is put in the box (so that level 4 could retrieve it, in theory).
+  holdtreasure: This is where items go when they are put in the urinal.
+  items: This has the same meaning as it had in the previous homework.
+  start: This has the same meaning as it had in the previous homework.
+  treasures: This is where items from holdtreasure go when you flush.
+
+And there you have it. That is the walkthrough.

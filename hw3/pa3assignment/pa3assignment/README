@@ -1,0 +1,657 @@
+                          UNIX System Programing
+                        Programming Assignment #3
+                       "An Objectively Better Game"
+
+
+Due: Friday, April 14  at  11:59 pm.
+
+Submission method: You will post to the course website, just like the previous
+                   assignment. 
+
+Submission rules: I REQUIRE you to FOLLOW THESE RULES:
+
+                  1. Submit one file named "<your student ID>.pa3.tar"
+		     That tar file will contain a directory that is named
+                     "<your student ID>.pa3". Inside of that directory will be
+                     8 files: cut, drop, exam, get, pa3.sh, put, reset, trydoor
+                  2. Submissions made after the deadline will be ignored.
+                     (That means: no late submissions on this assignment.)
+                     (By the way, if you don't turn in your assignments, you
+                      will probably Fail The Class. That's a Fact. So start
+                      early and ask questions.)
+                  
+                  This is a large class. Unless each of you follows the above
+                  rules, the TAs' work becomes so hard. So I INSIST that you 
+                  FOLLOW the above rules. If you don't, we won't accept your 
+                  homework.
+
+                  If you have questions about these rules, you may post your 
+                  questions to the course website.
+
+
+Getting help:   - The Professor has office hours on Monday from 12:30-2:30, 
+                  and on Friday from 10:00-12:00, in room 9037.  He can also 
+                  be reached by email.
+                - The TAs are also available to answer your questions.
+                - Questions about the assignment can be posted to the 
+                  Discussion Forum.
+                - You may also discuss the ideas of the assignment with your
+                  classmates. Such discussions can be quite helpful to your 
+                  learning -- IF you ONLY talk about the general concepts of
+		  the steps of the assignment.
+		  - If, however, you tell other students the specific details
+		    of your implementation, then you are not helping each other
+		    to learn; you are just doing the work for them.
+                    In other words, you are cheating. You CANNOT show another
+		    student ANY part of the answer to the assignment.
+
+Cheating policy:  We encourage students to form study groups. But this does not
+                  mean sharing code. If students are found to be sharing work,
+		  they can receive a 0 for the entire course, or worse.
+                  It is cheating to let another student see your work, or to 
+                  let them look over your shoulder when your code is on the
+		  screen.
+		  A good way to know you cheated: if you have code that is in
+		  your solution just because another student told you to put
+		  it there, but you don't actually understand it.
+		  If you are still unsure, you can ask the TA for more
+		  explanation.
+                  We always look for evidence of cheating, so don't do it.
+                  (In any event, even if you do not get caught, those who 
+                  copy the homework will not learn the material, so they 
+                  will fail the exam.)
+
+Most Important    The programming assignments are a large part of the grade.
+Things to Know:	  This large point value means that, if you don't do them, you
+		  will fail.
+		  The large point value also explains why the policy against
+		  cheating is strictly enforced.
+		  
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+Assignment Summary:
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 1. The Concept of the Assignment :
+'''''''''''''''''''''''''''''''''''''''''
+
+This assignment extends the last homework, to allow you to provide objects to
+your commands. One example of this, in the original game, is the "x" command
+which lets you examine objects. We couldn't implement it last time, because
+the "x" command takes an argument (the object that you wish to examine).
+
+Now that we have learned more about UNIX over the past few weeks, we know how
+to use arguments. We also know how to create loops, conditional tests, and
+variables. In fact, we now know enough about csh that we would not do the
+previous homework the same way, if we redid it; we would instead do the whole
+thing in a single cshell script without using weird aliases. Although we're not
+going to redo things, we will use cshell scripts for the new parts. (Note: the
+new scripts that you write must all be in cshell, but the original pa3.sh file
+of aliases must be in bash (i.e., the default shell) because it needs to use
+the "2>" redirection method.)
+
+In addition to adding the new commands x, drop, get, put, cut, reset, score,
+and quit, this homework also modifies the directory structure. My original
+inspiration for these dunnet homeworks was how the rooms of a text game are
+connected like the directories in UNIX. Well, we can extend the comparison
+further. In the original game there is a hole that is hidden by a towel. This
+type of situation can be modeled with a hidden directory. And the original
+game also has a room that is locked. This type of situation can be modeled by
+removing permissions to the directory for that room.
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 2. Provided Files :
+''''''''''''''''''''''''''
+
+If you are reading this file, then you must have untarred the assignment.
+Looking in the untarred directory, you will see:
+
+% ls
+pa3.sh  README  rooms.tar  walkthrough
+%
+
+In the above files, first notice the walkthrough file. This is almost the
+same file that I posted a few days ago. It is a walkthrough of the new game.
+To begin understanding this assignment, first read this file. (If you already
+read the earlier file, you can use "diff" to just look at the changed parts,)
+
+Second, notice the rooms.tar file. This file is almost the same as a file that
+I posted a few days ago. It contains all of the rooms for this assignment. All
+items are in their correct locations and the hidden hole in the Red Room is
+named ".h". There are also some new directories that the tar file creates, as
+lines 670-682 of the walkthrough file describe.
+
+Third, notice the pa.sh file, which is also almost the same as a file that I
+posted a few days ago. This file is essentially my solution to homework 2 (but
+modified slightly to support the new assignment), along with some code for
+invoking the cshell scripts that you will be writing. The file has comments
+and you should read it. Even though you don't have to change it much, reading
+it will help to clarify the assignment. Let us now look at it:
+
+% head -51 pa3.sh | tail -7
+# The following 6 commands each require you to write a script, as indicated:
+alias get='~/get'
+alias drop='~/drop'
+alias x='~/exam'
+alias reset='~/reset'
+alias put='~/put'
+alias cut='~/cut'
+%
+
+The above lines show the alias code that will invoke the six scripts that you
+will create in this assignment. Notice that the "getall" function no longer
+exists, because now we can say "get all" (or "get gold", "get axe", etc.).
+Notice also that the aliases above don't mention arguments, but your scripts
+will get arguments, nonetheless. What do I mean? Well, if you typed "x gold"
+then the alias "x='~/exam'" would replace the x that you had typed with its
+alias, thus executing this command: "~/exam gold". Clearly, your exam script
+receives the "gold" argument as its first parameter.
+
+In the above, also notice that there is an alias for "cut", because this is
+one of the commands in the original game. Unfortunately, "cut" is also a unix 
+command. Not only have we learned this command, but it turns out that we will
+need to use cut in one of our scripts. This leads to a problem, however,
+because we have aliased cut, so how can run the original command? The answer
+is to specify the full path to the cut executable (which you can find by using
+the "which" command). Also, by the way, the previous assignment had you define
+the "sleep" alias. This same problem arises for "sleep," because it also is a
+UNIX command that gets used in one of your scripts.)
+
+Now, let's look at some more of the file:
+% head -15 pa3.sh | tail -4
+# Eight of the movements have Backtrack and Forward movement.
+#         Backtracking movement:            Forward move:  Succeed:   Fail:    
+alias nw='BacktrackTest se>&~/X && cd .. || cd nw>& ~/X    && l    || nogo'
+alias ne='BacktrackTest sw>&~/X && cd .. || cd ne>& ~/X    && l    || nogo'
+%
+
+From the above, we see that I streamlined the way to do movement. This change
+was necessary, because the "w" direction had to be given new abilities, as we
+can see here:
+% head -34 pa3.sh | tail -9
+# The final movement, west, is special because the forward movement may, in one
+# location, be prevented by the electronic door at ~/pa3/start/e/e/n/w.
+# You have to write the "trydoor" script to deal with this case. Also, because
+# the electronic door relocks itself, we need to relock the door. We could have
+# done this by locking it only after entering the locked room, but the code is
+# simpler for us to just always lock the room, without bothering to check
+# whether it is already locked:
+alias w='~/trydoor; BacktrackTest e >& ~/X && cd .. || cd w >& ~/X && l||nogo;\
+         chmod u-x ~/pa3/start/e/e/n/w'
+%
+
+Here we see that you have to write a "trydoor" script. This script has the
+potential of turning a nonexecutable "w" subdirectory into being executable.
+That would allow the "cd w" command (executed later in the sequence of the
+above alias) to be successful. We also notice that, regardless of anything
+else (i.e. not command=coordination dependent on anything) the electronic door
+directory is always locked when the "w" command finishes. The effect of this
+is to make the player have to reenter the code every time the room is entered.
+
+There is also the command to run the game:
+% head -61 pa3.sh | tail -9
+# The following command starts the game. It is like the last homework, except
+# that: 1) it uses my room solution (rooms.tar) and 2) it locks the electronic
+# door by making the directory nonexecutable. (I couldn't automatically make
+# the directory "locked" at the time when I created rooms.tar because the tar
+# program needed access to the directory, in order to tar it up. Likewise, you
+# will notice that we needed to "unlock" the directory before running rm -r:
+alias game='cd ~; chmod u+x pa3/start/e/e/n/w >& ~/X; rm -r pa3>&~/X;\
+            tar -xf rooms.tar >& ~/X; cd pa3/start; chmod u-x e/e/n/w; clear;\
+	    l; PS1="> "'
+%
+
+This command is very similar to the last programming assignment. The difference
+involves handling the locked room. As the comments above explain, tar won't
+work on directories without permissions.
+
+Next, let's look at a new command that I've already implemented for you:
+% head -65 pa3.sh | tail -3
+# This command "quits" the game. It creates a "$ " prompt to indicate this.
+alias quit='score;cd ~;unalias l look BacktrackTest nogo n e w s ne nw se sw i\
+           sleep dig get drop x reset put cut game quit score flush; PS1=\$\ '
+%
+
+Here, you can see that the quit command does what you might expect: it gets
+rid of all the aliases, takes us back to the home directory, and restores the
+normal bash prompt, "$ ". But it also calls a command called "score". What is
+that? Well, let's take a look and see:
+
+% tail -2 pa3.sh | head -1
+alias score='echo "You have to implement this"' 
+%
+
+Oh, it's an alias that you need to implement (but which doesn't call any new
+script). It's details will be explained in Part 3.
+
+In addition, you also have to implement the line that follows the above line,
+(whose details will also be described in the next part), as we can see here:
+
+% tail -1 pa3.sh
+alias flush='echo "You have to implement this"' 
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 3. Line by Line Guidance :
+'''''''''''''''''''''''''''''''''
+vvvvvvv
+pa3.sh:
+^^^^^^^
+Line 69: alias score='echo __________________'
+         Your solution here will provide the proper information to the echo
+	 command. You won't use ";" or "&&" or "||".
+
+         So, what is the score? There are 4 treasures: gold, platinum, diamond,
+	 and bracelet. The player can flush other items and they will appear in
+	 the treasure room (if we played the rest of the game), but those other
+	 items don't give points. Each treasure is worth 10 points.
+
+         How to do it? Well, we need a way to count how many treasures are in
+	 the treasure room (ie, checking that directory for those 4 files) and
+	 then to multiply that by 10. (Note: you can't just stick a "0" after
+	 the number, because no treasure -> "0 points", not "00 points".)
+	 
+Line 70: alias flush='__1__||__2__; __3__ && (__4__)'
+         __1__: Checks to see if you are in the room with the urinal.
+	 __2__: Prints a message about there being nothing to flush (because
+	        you aren't in the room with the urinal).
+         __3__: Checks to see if you are in the room with the urinal.
+	 __4__: This is several commands.
+	        It moves everything from the holdtreasure directory.
+		It prints Whoosh!!    <- Yes the !! is needed, use \ quoting
+		It prints an empty line.
+		It executes the score command.
+
+
+vvvvv
+drop:
+^^^^^
+I won't give you a line-by-line on this, because it is simple enough for you
+to figure out. This script moves files from your items directory to your
+current directory. There are just a few issues:
+   If the player drops either "life" or "preserver", both files must be moved.
+   If the player drops either "floppy" or "disk", both files must be moved.
+   If the object is dropped, it should say "Dropped."
+   If the object is not in the items directory, say "You are not holding that."
+
+
+vvvv
+get:
+^^^^
+This command is the opposite of drop, it moves items from the current directory
+to the items directory. Like with drop, get has to move the floppy-and-disk
+and life-and-preserver file pairs as pairs. And it must print a message if you
+try to get something that is not present.
+
+But the get command has several complexities beyond drop:
+1. You have to support "get all" which is implemented like getall in the
+   last homework. 
+2. If you try to pick up something that isn't moveable (eg, urinal or bed),
+   then you get an appropriate message.
+3. If you pick up the towel in the Red Room, then you print the message about
+   the hole, and you move ".d" to "d". (But it must only be done once. Suppose
+   I: 1) picked up the towel (and get the hole message), 2) dropped the towel,
+   3) picked up the towel again (and DON'T get the hole message).
+   
+Line 1: #!/usr/bin/tcsh
+Line 2: if ($1 == all) then
+Line 3: if the towel is present in the room, set a variable.
+Lines4-6:mv ??[^midxburn]* ~/pa3/items >& ~/X && echo "You pick things up." ||\
+            ( ls ??[xumbird]* >& ~/X && echo "You cannot pick that up." ) || \
+            echo "There is nothing here to get."
+	 This is the solution of getall from the previous homework. Since it is
+	 from the earlier homework, I'm just giving it to you here.
+Line 7: else if ( __1__ ) then
+         This line test for whether the requested object is not present
+Line 8:    echo "You cannot see that here."
+Line 9: else if ( __1__) then
+         This line tests for whether the requested object is something that
+	 can't be picked up (we already know that it is present because of
+	 line 7). Well, what does it mean to be something that can't be picked
+	 up? Isn't that the same as not being something that can be picked up?
+	 And didn't line 6 use "??[^midxburn]*" to find things that can be
+	 picked up? Well, what would the opposite of that be (at least for
+	 filenames of at least 3 letters, like ours are).
+	 And with that pattern, we can use the =~ operator of Slide 43 of
+	 Lecture 4. (Note: that slide warns that =~ does not always behave as
+	 you would expect, but I've tested it and this one works.)
+Line 10:   echo "You cannot pick that up."
+Line 11:else
+         At this point we know that the player has asked to pick up a valid
+	 object that really is in the room. There are just a few things to
+	 deal with (in any order):
+	   Lines 12-??: Move the file.
+	                If it is life/preserver or floppy/disk, then also move
+			  the corresponding paired file.
+			If it is the towel, then set the same variable that
+			  line 3 sets.
+                        Print "You pick up the ____"
+			  Where ____ is the file name.
+Line ??+1:endif
+
+Line ??+2: empty line
+
+Line ??+3: If the variable from line 3 exists then
+
+Line ??+4-end: At this point, we know that we have picked up the towel, but we
+               don't know if this is the first time that we have done so.
+
+	       When we pick up the towel the first time, 3 things must happen:
+               1) The ".d" subdirectory is renamed to "d".
+	       2) You print "Taking the towel reveals a hole in the floor."
+	       3) The ".hiddenhole" file is renamed to "_hiddenhole"
+                  I have not previously mentioned to you about this file. As
+		  you can see, it is a hidden file in the Red Room directory.
+		  Its contents are:
+		    % cat ~/pa3/start/e/e/n/d/d/sw/w/d/e/.hiddenhole
+                    a hole in the floor
+		    I don't know what that is.
+                    %
+
+                  Here, we see that the file is designed to work with the "l"
+		  command. _hiddenhole doesn't match to ??[^midxburn]*, so its
+		  not an object that can be picked up. But it does display.
+		  This is important because of how the game works. If you look
+		  at the contents files, they tell you about the available
+		  exits. But this was a hidden exit. If we don't display it,
+		  then the user won't be told about the exit when they reenter
+		  the room. (See lines 637 to 640 of the walkthrough file.)
+		  
+
+vvvvv
+exam:
+^^^^^
+
+Line 1: #!/usr/bin/tcsh
+
+Line 2: cp __1__ __2__ __3__ >& ~/X
+        The issue that this line deals with is that the object can be either
+	in your inventory or in your current directory. To simplify things, our
+	solution is put both files in one place. (Of course, there is no such
+	thing as "both files": if it is in your items, then isn't in your room,
+	and visa versa. Moreover, it could be neither place. But these are
+	technical quibbles. Our job, in this line, is to put both things in one
+	one place.)
+	Q: Where is that "one place"? A: Use ~/pa3.
+        Q: What is the file name to copy there? A: It is the first parameter.
+	
+Line 3: if ( __1__ ) then
+        This line checks to see if the file exists.
+
+Lines 4-5:Here, we want to display the contents of the file. But let us
+          consider how these files are designed. For example:
+	  % cat ~/pa3/items/paper
+          A slip of paper
+          The paper says: Don't forget to type 'help' for help.  Also, remember
+          this word: 'worms'
+          %
+
+          The issue here is that the "exam" command should not display the
+	  first line. If we knew the sed command, this would be easy. But we
+	  don't know that command yet, and so must use tail. The problem is
+	  that we don't know how many lines to tail. For the paper it would be
+	  tail -2. But for the shovel, it would be tail -1. And for the urinal
+	  it would be tail -6.
+
+	  So, how to do it? We use 2 lines:
+	  Line 4: This creates a variable and assigns it a value that is one
+	          less than the number of lines in the file for the requested
+		  object.
+		  (Note: you will need `` and xargs)
+		  (Note: Observe the difference in output between "wc -l F" and
+	                 "cat F | wc -l".)
+
+	  Line 5: tail __1__
+	          Now that we know how many lines to print, we print it, using
+		  appropriate flag(s). 
+
+Line 6: rm __1__
+        This removes the copy that we had created on line 2.
+		  
+Lines 7-9:These lines deal with the case that the requested object is not in
+          a place where you can see it. An appropriate message is printed.
+Here, we want to display the contents of the file. But let us
+else
+   echo "I cannot see that here."
+endif
+
+
+vvvv
+cut:
+^^^^
+Line 1: #!/usr/bin/tcsh
+Line 2: If you don't have the axe, then
+          Line 3: You print: "You have nothing with which to break things."
+Line 4: If no parameters were sent into this script, then
+          Line 5: You print: "You must supply an object."
+Line 6: If the 1st parameter isn't a file in items or your current directory
+          Line 7: You print: "I don't see that here."
+Line 8: If the object isn't the cable, then
+          Line 9: You print: Your axe shatters into a million pieces.
+	  Line 10:You remove the axe from you items.
+Lines 11-17: otherwise, you print the following, with lines 12-17:
+      As you break the ethernet cable, everything starts to blur.  You collapse
+      for a moment, then straighten yourself up.
+
+      Connection closed.
+
+      Congratulations. You finished the level.
+Line 18: endif
+
+
+vvvvvvvv
+trydoor:
+^^^^^^^^
+Line 1: #!/usr/bin/tcsh
+
+Line 2: If there is a subdirectory named "w", then
+
+        Line 3: If that subdirectory does not have permissions for you to
+	        enter, then
+		Here, there are two ways that you could test. One would be to
+		just try to see the w/cable file. But I won't let you do it
+		that way. Instead, this will be a chance to practice using the
+		unix cut command.
+		Step 1: "ls -ld w" will contain a "-" in the 4th position if
+		        you don't have permissions (or an "x" if you did have
+			permissions).
+		Step 2: Use cut to just get the 4th character. Note: since
+		        we've aliased "cut", we'll need to use the full path
+			to the cut command.
+		Step 3: If you think about it, the fact that the "-" can be
+		        the 4th character means that you can run into the
+			problem described in slides 1-7 of Lecture #5. So you
+                        need to use the technique described in those slides.
+
+                Line 4: Inform the player that a 3 digit code is required.
+		Line 5: Prints "Enter it here: " and doesn't print a newline.
+		Line 6: Read a keyboard input.
+		          Line 7: If the entered code was 869, then 
+			            Line 8: make the w directory executable.
+
+Lines 9-13:
+      else
+         echo Sorry, that combination is incorrect.
+      endif
+   endif
+endif
+
+
+vvvvvv
+reset:
+^^^^^^
+
+This script is longer. It needs to pretend that you are using an old PC.
+To understand its function, read 280-297 & 322-386 of the walkthrough file.
+
+One comment: Those old PCs were slow. It would take about 2 seconds to read
+             the disk and to respond to a command. The game includes this
+	     feature. If you look closely at the game, it has a delay on this
+	     part. We also will have the same delay. We do this by using the
+             sleep command with a "2" argument (ie, sleep for 2 seconds).
+	     But, sleep is an alias in the game, so the full path to the UNIX
+	     sleep command will be needed.
+
+Line 1: #!/usr/bin/tcsh
+Line 2: If you are not in the room with the PC, then
+          Line 3: echo That operation is not applicable here.
+Line 4: If the ".floppy" file isn't present (because you didn't "put" it), then
+          Line 5: Sleep for 2 seconds.
+          Line 6: Print "Boot sector not found".
+Line 7: else
+          Line 8: Sleep for 2 seconds.
+          Line 9: echo Current time is `date | __1__`
+	          Here, the date command prints the date and time. Since I
+		  didn't teach this command, I'm just giving it to you here.
+		  The only thing that you need to know about date is that it
+		  prints a variety of things, but the SIXTH thing that it
+		  prints is the current time. So we need to just print that
+		  6th field.
+          Line 10: Prints "Enter new time:" without going to the next line.
+          Line 11: Read keyboard input (but we'll never use the entered value.)
+          Lines 12-39: an infinite while loop.
+                Line 13: Print the "A> " prompt
+                Line 14: Read a keyboard input. BUT, the input can have spaces
+		         so you will need to use double quotes to read the
+			 whole string as one value.
+                Line 15: Update the variable from line 14 to capitalize every
+		         letter (because those old PCs weren't case-sensitive.)
+                Line 16: Sleep for 2 seconds.
+                Lines 17-38: A switch statement based on the keyboard input
+		             from lines 14&15       
+                    Lines 18-20: These lines deal with the DIR dos command.
+		                 ("DIR" in dos is like "ls" in UNIX.)
+                                 I didn't want to make you type out the
+				 contents of the floppy, so I have provided
+				 you with a hidden file ".dir" in this room.
+				 So all that you have to do is cat that file.
+                    Lines 21-32: These lines deal with the TYPE dos command.
+		                 ("TYPE" in dos is like "cat" in UNIX.)
+				 
+				 It uses a switch command. For this command,
+				 there is a technical difficulty. suppose the
+				 player had typed "type xyz" on line 14,
+				 then after line 15, we would have "TYPE XYZ".
+				 Now, for this switch statement, we want to
+				 look at just the typed file name (XYZ in this
+				 case). So, how to take a string with spaces
+				 and just get the second word in the string?
+				 Answer: treat it like an array.
+				 
+                                 In this switch statement, there are 3 cases:
+				  1 You tried to print COMMAND.COM
+				    So: It says "Cannot type binary files"
+				  2 You tried to print FOO.TXT
+				    So: It says "\nThe combination is 869."
+				  3 You tried to print anything else
+				    So: It says "File not found - ____"
+				        Here, fill the blank with the file name
+                    Lines 33-35: These lines deal with the EXIT command.
+		    	  	 This is what the player types when they want
+				 to stop using the PC. You need to print an
+				 appropriate message.
+				 You also need to leave the script, so that the
+				 infinite loop begun on line 12 doesn't go on
+				 infinitely.
+                    Lines 36-37: Otherwise, say "Bad command or file name"
+
+Line 38:       endsw
+Line 39:    end
+Line 40: endif
+
+
+vvvv
+put:
+^^^^
+This script has many things to do. You can:
+  1) Put anything in the urinal.
+     In this case the object moves from ~/pa3/items to ~/pa3/holdtreasure
+     (But the floppy/disk and life/preserver have to move as a pair.)
+  2) Put the floppy/disk in the computer/pc/drive.
+     In this case you will move floppy from ~/pa3/items to ./.floppy (In other
+     words, you can't see it or retrieve it, but it has had an effect -- the
+     reset command, described above, checks on its Line #4 for the presence of
+     this ".floppy" file, as its way of knowing that the PC should work.)
+     And, if the "floppy" is moved to ".floppy", then "disk" should be removed.
+  3) Put the key in the box.
+     In this case th key moves from ~/pa3/items to ~/pa3/holdkey
+  4) Print any of a variety of error messages.
+
+Also, as a learning exercise, you may only use backspace (\) quoting in this
+script. (ONLY \ means NO " and NO '. The only place ' is to be used is for the
+required contractions, like the "don't" in lines 2-4, as described below.)
+
+Line 1:#!/usr/bin/tcsh
+
+Lines 2-4:If $1 isn't in the items directory, then print "You don't have that."
+          Then exit.
+
+Lines 5-7:If you didn't give at least three arguments, then print "You must
+          supply an indirect object." Then exit.
+
+Line 8:endif
+
+Line 9:empty line
+
+Line 10: If the first argument was "disk" then turn it into "floppy".
+         Note: you can't say "set $1 = floppy", because that uses a "$" in the
+               assignment, where as we know that the "$" is only used when you
+               READ a variable. How, then, can we write to the first argument?
+               Well, the argument list is also an array with a specific name,
+               as described in Slide 18 of Lecture #4.
+
+Line 11: Similar to line 10, this line converts a $1 of "life" to "preserver".
+
+Line 12: empty line
+
+Lines 13-20: A switch statement using the 3rd parameter.
+             The purpose is to use multiple cases that spill into each other, 
+             for the purpose of renaming "pc", "IBM", "ibm", "drive", and 
+             "computer" all to "PC". In other words, if the player typed "put
+	     disk in drive" line 10 would turn it into "put floppy in drive" 
+             and then lines 13-20 would turn it into "put floppy in PC".
+             Note: There is a warning on slide 46 of Lecture 4, regarding case
+                   statements that spill into each other.
+
+Line 21: empty line
+
+Line 22: If $3 isn't present in either your items or the current directory then
+Line 23:    echo that indirect object is not here.
+
+Line 24: else if what you are putting into is the urinal then
+Line 25:    echo You hear it plop down in some water below.
+Lines 26-28: Move the item to ~/pa3/holdtreasure. Also remove the pair, in the
+             case of either the floppy or the preserver.
+
+Line 29: else if what you are putting into is the box then
+Line 30:   if what you are putting is the key then
+Line 31:      Move the key to ~/pa3/holdkey
+Line 32:      Remove the box
+Lines 33-34: Print the following, including the !:
+As you drop the key, the box begins to shake.  Finally it explodes"
+with a bang.  The key seems to have vanished\!
+
+Lines 35-36: As the else-clause to line 30, print the following, including
+             the ' and the !:
+You can't put that in the key box!
+Line 37:   endif
+
+Line 38: else if what you are putting into is the PC then
+Lines 39-41: If what you are putting is the floppy, then move it to .floppy
+             in the current directory and also remove the disk file.
+Lines 42-43: The else-clause that prints "You can't put that in the PC!"
+Line 44:     endif
+
+Line 45:else
+
+Line 46-47: At this point, we know that the player is trying to put something
+	    into an object that is present, but that object is not something
+	    that it is legal to put things into. So print:
+I don't know how to combine those objects.  Perhaps you should
+just try dropping it.
+
+Line 48:endif

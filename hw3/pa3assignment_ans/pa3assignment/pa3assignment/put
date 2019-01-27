@@ -1,0 +1,54 @@
+#!/usr/bin/tcsh
+if ( ! -f ~/items/$1 ) then
+echo "You don't have that."
+cd ..
+else if ( $#1 <= 3 ) then
+echo "You must supply an indirect object."
+cd ..
+endif
+
+if ( argv[1] == disk ) then mv disk floppy
+else if (argv[1]==life) then mv life preserver
+
+switch( $3 )
+case pc:
+mv pc PC
+breaksw
+case IBM:
+mv IBM PC
+breaksw
+case ibm:
+mv ibm PC
+case drive:
+mv drive PC
+case computer:
+mv computer PC
+endsw
+
+if ( !(-e $3) || !(~/item/$3) ) then 
+echo that indirect object is not here.
+else if ( $3 >& urinal ) then
+echo You hear it plop down in some water below.
+mv $3 ~/pa3/holdtreasure
+$3 == disk | mv floppy ~/pa3/holdtreasure
+$3 == life | mv preserver ~/pa3/holdtreasure
+else if ($3 == box) then
+else if ($3 == key) then
+mv key ~/pa3/holdkey
+rm -rf box
+echo "As you drop the key, the box begins to shake.  Finally it explodes\"
+with a bang.  The key seems to have vanished\!"
+else
+echo 'You can'\''t put that in the key box\!'
+endif
+else if ( $3 == PC ) then
+if ( $3 == floppy ) then
+mv ~/items/floppy .floppy
+rm -rf disk
+else
+echo "You can't put that in the PC!"
+endif
+else
+echo "I don't know how to combine those objects.  Perhaps you should\
+just try dropping it."
+endif

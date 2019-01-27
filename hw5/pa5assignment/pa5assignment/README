@@ -1,0 +1,948 @@
+                         UNIX System Programing
+                        Programming Assignment #5
+                        "XLgrep Crosses the Line"
+
+
+Due: Friday, May 26  at  9:00 am.
+
+Submission method: You will post to the course website, just like the previous
+                   assignment. 
+
+Submission rules: I REQUIRE you to FOLLOW THESE RULES:
+
+                  1. Submit one file named "<your ID>.pa5.tar"
+                     That tar file will contain a directory called <your ID>
+                       That directory will contain a file called XLgrep.
+		         It can also contain other files, but they won't be
+			   looked at.
+                  2. Submissions made after the deadline will be ignored.
+                     (That means: no late submissions on this assignment.)
+                     (By the way, if you don't turn in your assignments, you
+                      will probably Fail The Class. That's a Fact. So start
+                      early and ask questions.)
+                  
+                  This is a large class. Unless each of you follows the above
+                  rules, the TAs' work becomes so hard. So I INSIST that you 
+                  FOLLOW the above rules. If you don't, we won't accept your 
+                  homework.
+
+                  If you have questions about these rules, you may post your 
+                  questions to the course website.
+
+
+Getting help:   - The Professor has office hours on Monday from 12:15-2:15, 
+                  and on Friday from 10:00-12:00, in room 9037.  He can also 
+                  be reached by email.
+                - The TAs are also available to answer your questions.
+                - Questions about the assignment can be posted to the 
+                  Discussion Forum.
+                - You may also discuss the ideas of the assignment with your
+                  classmates. Such discussions can be quite helpful to your 
+                  learning -- IF you ONLY talk about the general concepts of
+		  the steps of the assignment.
+		  - If, however, you tell other students the specific details
+		    of your implementation, then you are not helping each other
+		    to learn; you are just doing the work for them.
+                    In other words, you are cheating. You CANNOT show another
+		    student ANY part of the answer to the assignment.
+
+Cheating policy:  We encourage students to form study groups. But this does not
+                  mean sharing code. If students are found to be sharing work,
+		  they can receive a 0 for the entire course, or worse.
+                  It is cheating to let another student see your work, or to 
+                  let them look over your shoulder when your code is on the
+		  screen.
+		  A good way to know you cheated: if you have code that is in
+		  your solution just because another student told you to put
+		  it there, but you don't actually understand it.
+		  If you are still unsure, you can ask the TA for more
+		  explanation.
+                  We always look for evidence of cheating, so don't do it.
+                  (In any event, even if you do not get caught, those who 
+                  copy the homework will not learn the material, so they 
+                  will fail the exam.)
+
+Most Important    The programming assignments are a large part of the grade.
+Things to Know:	  This large point value means that, if you don't do them, you
+		  will fail.
+		  The large point value also explains why the policy against
+		  cheating is strictly enforced.
+		  
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 1. The Concept of the Assignment :
+'''''''''''''''''''''''''''''''''''''''''
+The previous homework had a purpose that you did not realize at the time.
+The reason for us to identify those outside spaces was so we could now do
+new programming assignment. What I want is a version of grep that can find
+matches that cross a line boundary. We will call this XLgrep.
+
+For example, look at the last sentence you just read, from the paragraph above;
+it contains the phrase "find matches", but that line crosses a line boundary.
+Therefore, if we typed: "grep 'find matches' README.pa5", the answer would not
+include that line from the previous paragraph. (The grep would find the phrase
+as it is used in this current paragraph, however, because that time it didn't
+cross a line boundary.)
+
+XLgrep should also preserve most of the flags of grep. So, for example:
+% seq 50 | ./XLgrep "9 [23]" -C0
+1{9|
+2}0
+--
+2{9|
+3}0
+%
+
+The above shows that there are two places (among the 50 lines searched) where
+the a line ending in "9" is followed by a line beginning with either "2" or
+"3". The matching portion is identified by the curly braces, as well as the
+"|" symbols. Assume that these 3 symbols never occur in your input file.
+
+There can be multiple matches on one line:
+% echo "a b c d@e f@g h i j k l m" | tr @ "\n" | ./XLgrep "[a-m] [a-m] [a-m]"
+{a b c} {d|
+e f}
+{g h i} {j k l} m
+%
+
+A single match can also cross two lines:
+% echo "a b c d@@g h i j k l m" | tr @ "\n" | ./XLgrep "[a-m] [a-m] [a-m]"
+{a b c} {d|
+|
+g h} {i j k} l m
+%
+
+To make the idea clearer, we should use color. And that will be accomplished
+in a demo, described next...
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 2. Details of the Assignment :
+'''''''''''''''''''''''''''''''''''''
+To properly describe the assignment, it is helpful to use the --color flag of
+grep, so that the matches can be more-clearly seen. Unfortunately, I can't put
+color into this README file, because the color won't display correctly with the
+"less" command (which is probably how some of you view these README files). As
+a result, I have instead created a demo script that you can run and see it all
+explained, with colors.
+
+How to run the demo? Well, let's look in the untarred directory where this
+README file came from:
+  % ls
+  ExplanatoryDemo  leagues.txt  p4.sed  pa4b.csh  pa5.template  README.pa5
+
+Well, there it is "ExplanatoryDemo". Let's give it a run. But first, let's look
+at it a bit:
+  % head -1 ExplanatoryDemo
+  #!/usr/bin/tcsh
+
+Here we see that it is a cshell script that assumes that your cshell executable
+is located in /usr/bin. This will be the case for most, but not all, of you.
+Let's see if it is the case, for me:
+  % which tcsh
+  /usr/bin/tcsh
+
+Here we see that it is the case for me. So the script works, for me. If it is
+not the case for you, then the script won't work for you (until you modify the
+first line of the demo file so that it has the right path).
+
+So, now that you have modified (if necessary) the demo file, you should be able
+to run it. But you must be in this directory, or else parts of the script won't
+work as intended. Anyway, let's run it:
+  % ./ExplanatoryDemo
+
+At this point, the demo will run. You should make sure that your screen is at
+least 80 characters wide. As you run the demo, keep hitting <enter> to advance
+the demonstration.
+
+Go and run the demo now. When you finish, you will understand the goals of this
+assignment.
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 3. A Note on Flags :
+'''''''''''''''''''''''''''
+Since this is a course about UNIX, we should understand how flags get parsed.
+The following commands all achieve the same thing:
+
+grep -now  ==  grep -n -o -w  ==  grep -own  ==  grep -nowow -n
+
+And these do the same thing:
+cat F|grep -eX  ==  grep -eX F  ==  grep X F  ==  grep -e X -fF  ==  grep -fF X
+
+And these do the same thing:
+grep -iC2 -fF e --color == grep --color -i -C 2 -eX F == grep -fF -iee --color
+
+Notice, from the above, that we can have characters that aren't flags:
+1.Because of a -- :
+   grep -o --color != grep --color,  but  grep -o -color == grep -oc -rl
+2.Because of a [ABCDdefm] symbol:
+   grep o -o -fo  =  grep -oeo o  ==  grep -o -oofo -eo
+
+So, how does UNIX flags? Well:
+  1. flags begin with "-"
+  2. After that point, if the next symbol is a -, then it's a "--" flag, such
+     as "--color".  The letters in the flag will be interpreted as a word, not
+     as each letter being its own flag. (XLgrep will deal with all such --flags
+     by passing them, as is, to grep.)
+     Note that the UNIX --flags must be their own arguments, they can share
+     space with single character flags. That why the following commands behave 
+     as they do:
+        % seq 3 | grep e--color -e 2
+        grep: e--color: No such file or directory
+        % seq 3 | grep -e--color -e 2
+        2
+        % seq 3 | grep -i--color -e 2
+        grep: unknown option -- -color
+        ...
+  3. There is another way, besides --flags, to cause the rest of the characters
+     to be interpreted as a string, rather than as individual flags. That is by
+     using one of the flags that expects a value: -[ABCDdefm]. Thus, we get the
+     following behaviors:
+       % echo axbxc|tr x "\n" | grep -iA1 B
+       b
+       c
+       % echo axbxc|tr x "\n" | grep -Ai1 B
+       grep: i1: invalid context length argument
+       ...
+  4. Parameters that don't begin with a "-" are not flags. Based on context,
+     they can be any of three things: a regular expression, a filename, OR the
+     value of a flag that wants a value ([ABCDdefm]). For example:
+       % echo axbxc|tr x "\n" | grep -iA 1 B
+       b
+       c
+       % echo axbxc|tr x "\n" | grep -iA0 1 B
+       grep: e--color: No such file or directory
+
+       In the first of these two examples, the "1" is the value for -A, and the
+       "B" is the regular expression. (No filename is given, so input comes
+       from the input stream.
+       In the second of these two examples, the "1" is the regular expression 
+       (It isn't the value for -A, because that value, 0, was already provided)
+       The "B" is the filename, hence the error.
+
+As a final note, be aware that, as described later on:
+1. I have remove some of grep's flags.
+2. I have added a -M flag which takes a value (like [ABCDDEFm])
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 4. Specific Details of the Assignment :
+''''''''''''''''''''''''''''''''''''''''''''''
+If you look again in the provided files directory, you will see that there are
+two files we haven't talked about yet, pa4b.csh & pa5.template:
+  % ls
+  ExplanatoryDemo  leagues.txt  p4.sed  pa4b.csh  pa5.template  README.pa5
+
+The pa4b.csh is file is nothing new. It comes from the last homework:
+  % cat pa4b.csh
+  #!/usr/bin/tcsh
+  set echo
+  $1:q >& /dev/null
+
+Again, as with the earlier discussion of ExplanatoryDemo, you may need to fix
+the path to you csh executable. Anyway, let's now look at the more interesting
+file, pa5.template. This file contains 32 uniquely numbered blanks (there are
+some repeats, where the same text needs to be inserted into different places).
+We'll now discuss each of these different blanks. Let's begin at the top:
+
+Blanks #1 & #2:
+"""""""""""""""
+% head -6 pa5.template
+#!/usr/bin/tcsh
+if ( 0 ) then
+__1__;__1__;s/
+/{&}/g;s__2__;s__3__
+endif
+
+%
+
+From the above, we see 3 blanks (well, 4 -- but the __1__ blank is repeated).
+The above blanks are in a very strange piece of code, a piece of code that 
+never runs, because it is inside of an if(0) clause. Why would we do this?
+It is because these lines of code are not cshell code -- they are sed code. 
+
+What kind of sed code? Well, it's kind of weird. If you will remember, the
+last homework was also weird: the user-supplied arguments included a regular
+expression, and that made it hard to use. In the past homework, we solved this
+by using a strange script, pa4b.csh to get the parameter into a file without
+echoing it. That issue is why these two lines are confusing.
+
+The sed program we want is:  "_1_;_1_;s/<expressionHere>/{&}/g;s_2_;s_3_".
+Notice the <expressionHere> part of the above. That is the source of weirdness.
+Remember that file from pa4b.csh that we talked about in the last paragraph?
+Well, it gets inserted here. That is why it gets weird. We are constructing
+that sed program by splitting it into three parts:
+ o part 1  =>  head -3 pa5.template | tail -1
+ o part 2  =>  the file created from pa4b.csh
+ o part 3  =>  head -4 pa5.template | tail -1
+
+So, what does this sed program do? It finds matches to the regular expression,
+and then puts curly braces around them. It also inserts the | symbols at the
+ends of lines that finish in the middle of a match. So, how is it done? We'll
+now see the implementation details of the three blanks:
+
+__1__: This command loads an additional input line into the pattern space.
+       (Note that this blank is repeated on line 3 of the template file, and 
+        that this doubling is why 3 line triplets are in the pattern space. And
+        that, in turn, is why matches can only be found within triplets, as
+        described in the demos.)
+
+__2__: This command inserts a "|" at the end of every line that ends inside of
+       a match. 
+       The pattern? The end portion of a line, between "{" and the "\n", if it
+       has no "}" in that portion.
+       The replacement? Putting the pattern back, but with a | before the \n.
+       The flag? Well, there are three lines, so there can be multiple (ie, up
+       to two) such replacements.
+
+__3__: This command checks for the situation where there is a single pattern
+       that spans all 3 lines of the pattern space. It puts the "|" at the end
+       of the second line, in the situation that the 1st line ends with a "|"
+       and the 2nd line doesn't have a "}". 
+       Eg: echo ab__bc |tr _ "\n" |./XLgrep "b  b" |tr "\n" "_" ==> a{b|_|_b}c_
+           This __3__ is what puts the 2nd "|" in the a{b|_|_b}c_ shown above.
+
+Now let's move on to the next part of the template file:
+% head -17 pa5.template|tail -11
+rm -f pa5.tmp?
+echo -n > pa5.tmpP
+echo -n > pa5.tmpC
+echo -n > pa5.tmpF
+echo -n > pa5.tmpE
+echo -n > pa5.tmpL
+
+foreach i (__4__)
+  ./pa4b.sh $argv[$i]:q >& pa5.tmp2
+  cat pa5.tmp2 >> pa5.tmp1 
+end
+%
+
+__4__: This blank will allow the variable i to range from 1 up to the number of
+       parameters passed into this script. Notice the "$argv[$i]:q" in the text
+       above. We need the :q because we have to deal with the fact that the
+       regular expression symbols make thing weird.
+
+       But think about what the above code is doing. It is creating a file,
+       named pa5.tmp1, that holds all of the provided parameters, one per line.
+       (We had to use two commands, because UNIX supports >& but not >>&.)
+
+
+Now, let's move on to the next part. Earlier, in Part 2, we described how,
+sometimes, the letters of an argument are individual flags, and sometimes they
+are interpreted as a string. To summarize that earlier discussion:
+  1. If the parameter begins with "--"
+  2. If the parameter begins with "-" but encounters, somewhere inside, a flag
+     that needs a value. For example "grep -nowB42 -wiffle". (Here the "42" and
+     the "fle" are strings, not flags.)
+  3. The value does not need to be in the same parameter, it can be separated 
+     by a space, For example, this has the same meaning as the previous example
+     had: "grep -nowB 42 -wif fle".
+
+Now, I want to add a little more information about XLgrep:
+  1. I added a new -M flag to XLgrep that normal grep doesn't have. It is now
+     also one of the flags that wants a value.
+  2. I also removed some grep flags that wouldn't make sense with XLgrep, such
+     as D and d. These grep flags, which would have wanted a value, now don't
+     count. They were removed because they don't make sense when XLgrep is not
+     designed to take input from multiple files, or to do some other things 
+     that grep does.
+  3. I did not remove any of the --flags, although some of them might also not
+     make sense with XLgrep behavior.
+
+Now I want to lay out a strategy for dealing with these strings within flags:
+  1. Since the value is sometime separated by a space from its flag, it will
+     sometimes be on a separate line in the pa5.tmp1 file. But, sometimes, it
+     will be on the same line.
+     - To simplify things, we want to make it always be on a separate line
+  2. As for the flag that gets the value, it will sometimes occur at the end of
+     a list of other flags, For example, the "B" in "grep -nowB 42 -wif fle".
+     - To simplify things, we want to make it always be on a separate line. So:
+       User Types:              |  pa5.tmp1 contains:  |  We want to make:
+       XLgrep -nowB 42 -wiffle  |  -nowB               |  -now
+                                |  42                  |  -B
+                                |  -wiffle             |  42
+                                |                      |  -wi
+                                |                      |  -f
+                                |                      |  fle
+
+OK, so let's move on, and see how we do it:
+% head -20 pa5.template|tail -3
+cat pa5.tmp1 | sed 's__5__' |\
+    grep __6__ | sed 's__7__' | grep __8__ > pa5.tmp3
+
+%
+
+__5__: The inputs to this sed are the individual parameters the user provided.
+       The purpose of this command is to split a flag list into two lines, if
+       a character is encountered that makes the rest of the line become a 
+       string. For example, in "-nowB42", the "B" is that character. In "-ieB1"
+       the "e" is that character. (So "B" isn't, because it is in a string).
+       In "-ffilename", the first "f" is that character. And, in "--color", the
+       second "-" is that character, (but in a somewhat different sense).
+         The different sense is that we don't want to turn "--color" into 
+         "-\n-color", because then the new "-color" line would look like the 
+         flags "-colr". Our solution to this is to put a "%" into the output:
+
+           pa5.tmp1 contains:  |  __5__ creates:
+           -nowB               |  -now
+           42                  |  -%B
+           -wiffle             |  42
+           --color             |  -wi
+           [0-9][0-9]*         |  -%ffle
+                               |  -
+                               |  -%-color
+                               |  [0-9][0-9]*
+
+       So, how to do it? Well, Well, you need to find the first value-requiring
+       character (including the "-" of --flag), but only on lines that really
+       are flags. Now, this must all be done with a single s command. And that
+       complicates things, because "s/[-A-Ddefm]/\n-%&/" would not work. Why
+       not? Because (among other problems) the inputted regular expression 
+       "[0-9][0-9]*" would become "[0\n-%9][0-9]*"
+       The problem is that s/[-A-Ddefm]/\n-%&/" doesn't check for the "-" at
+       the beginning. So we need to use a more-complex pattern. (Now, the best
+       solution would be to use some other sed commands. But, since we did not
+       get up to those commands in Lecture 10, we can't use them here.)
+
+__6__: This is the flag(s) and expression(s) to use in a grep command to remove
+       all lines that have only one character, where that character is a "-".
+       
+       Look up above to the place where it displays the result of __5__, under
+       a heading titled: "__5__ creates:". See that that output has 9 lines of
+       output. See that 7th line of output was "-". The purpose of this new
+       blank, __6__, is to remove that 7th line.
+
+__7__: This is a single sed s command. It's goal is to split the flags that
+       require values onto separate lines from their values. In the example
+       we've been using, that would mean:
+           pa5.tmp1:  |  after __5__:  |  after __6__:  |  after __7__:
+           -nowB      |  -now          |  -now          |  -now
+           42         |  -%B           |  -%B           |  -%B
+           -wiffle    |  42            |  42            |
+           --color    |  -wi           |  -wi           |  42
+           [0-9][0-9]*|  -%ffle        |  -%ffle        |  -wi
+                      |  -             |  -%-color      |  -%f
+                      |  -%-color      |  [0-9][0-9]*   |  fle
+                      |  [0-9][0-9]*   |                |  -%-color
+                      |                |                |  [0-9][0-9]*
+
+       Notice here that the first f in "-%ffle" was identified as such a flag,
+       and that it did get separated from its value. Moreover, the rest, "fle",
+       does contain characters that would have required values (the "f" and the
+       "e"), but that we know they are part of a string, because they don't
+       have a "%" in front of them.
+       Notice also that the -B has now become separated by two lines from its
+       value. This is because it was already separated from its value, by the
+       user, when the user had typed:
+         % cat whateverfile | ./XLgrep -nowB 42 -wiffle --color "[0-9][0-9]*"
+
+__8__: So we next want to get rid of that blank line between the -%B and the
+       42. That is the job of the "grep __8__". Removing the empty lines is the
+       same as printing the nonempty lines.
+
+Thus, at this point you should obtain:
+User types:                     |  pa5.tmp1 contains: |  pa5.tmp3 contains:
+./XLgrep -nowB 42 \             |  -nowB              |  -now
+-wiffle --color "[0-9][0-9]*"   |  42                 |  -%B
+                                |  -wiffle            |  42
+                                |  --color            |  -wi
+                                |  [0-9][0-9]*        |  -%f
+                                                      |  fle
+                                                      |  -%-color
+                                                      |  [0-9][0-9]*
+
+Before moving on to the other steps, you can code and debug the first 20 lines
+of your file. You can type "./XLgrep -nowB 42 -wiffle --color "[0-9][0-9]*", 
+and see if you get the proper output in pa5.tmp3
+
+
+Let's assume you have done so, and let's move on to the next blank:
+
+% head -26 pa5.template|tail -6
+grep -q "^-%-help" pa5.tmp3
+if ( __9__ ) then
+  tail -18 XLgrep
+  exit
+endif
+
+%
+
+The above code is pretty simple. It checks to see if the user has requested 
+"--help". If so, it prints the help display and quits. (If you look through
+the template file, you will see that the last 18 lines are a help display.
+They are not UNIX code, but they don't break the script because the line before
+them is an exit -- so these lines never get executed.)
+
+__9__: Well, how would you test to see if the "grep -q ..." had found a match?
+       If you think you are right, you can test it and see.
+
+
+Let's move on:
+Next, we want to make sense of the kind of information stored in the pa5.tmp
+file. To do this, we can encode each line, as illustrated below:
+  pa5.tmp3 contains: |  Coded meaning:
+  -now               |  F (regular [F]lag(s))
+  -%B                |  A (a flag that requires an [A]dditional line)
+  42                 |  P (a plain [P]arameter) 
+  -wi                |  F (regular [F]lag(s))
+  -%f                |  A (a flag that requires an [A]dditional line)
+  fle                |  P (a plain [P]arameter) 
+  -%-color           |  L (a [L]ong --flag)
+  [0-9][0-9]*        |  P (a plain [P]arameter) 
+
+Get the idea? The above example did not contain all codes. The full list is:
+  F (regular [F]lag(s))
+  A (a flag that requires an [A]dditional line)
+  P (a plain [P]arameter) 
+  L (a [L]ong --flag)
+  D (a flag that requires an [A]dditional line, but which is actually not
+     allowed by XLgrep. This can only be one of two things: grep's -D or -d
+     flag.)
+
+OK, so let's see how it is done:
+% head -28 pa5.template|tail -2
+set ArgTypes = ( `cat pa5.tmp3 | sed 's_10_;s_11_;s_12_;s_13_;s_14_' | tr "\n" " "` )
+
+%
+
+The above is a series of sed substitutions. It is fairly obvious how you can 
+use sed substitutions to find the right code for each of the lines in pa5.tmp.
+The only thing to be careful about is to do it the substitutions in the right
+order. If, for example, you replace "-%B" with "A", before you replace lines 
+that aren't flags with "P", then the "A" would be (incorrectly) changed to "P".
+
+
+Moving on:
+% head -31 pa5.template|tail -3
+foreach i ( __15__ )
+  head -n $i pa5.tmp3 | __16__ > pa5.tmp4
+  switch ( __17__ )
+
+__15__: This will iterate through all of the elements of the ArgTypes array.
+        If, for example, the array has 4 elements, then i will iterate from 1
+        to 4.
+
+__16__: If you look at the line that contains this blank, it creates pa5.tmp4
+        which is a copy of the pa5.tmp3 file, up to the current line. 
+        Now, as for the __16__, it removes all of the "%" symbols from the
+        text sent into the pa5.tmp4 file.
+
+__17__: This switch statement looks at the individual element at position i 
+        of the ArgTypes array. 
+
+moving on:
+% head -37 pa5.template|tail -6
+    case "L":
+      tail -1 pa5.tmp4 >> pa5.tmpL; breaksw
+    case "P":
+      tail -1 pa5.tmp4 >> pa5.tmpP; breaksw
+    case "F":
+      __18__ >> pa5.tmpC; breaksw
+
+The above code adds lines to the ends of three different files, under three
+different situations. 
+To begin understanding these lines, it is important to recognize what the
+"tail -1 pa5.tmp4" statement actually means. Yes, it get the bottom line of 
+that file. But what does it MEAN? Recall that line 30 had created this file 
+from the top i lines of the pa5.tmp3 file. So the bottom line of this file is
+the specific input line that corresponds to whatever code is in that position
+of the ArgTypes array.
+With this understanding, things make more sense. We have a file, pa5.tmpL, to
+hold all the specific input lines that encode as "L" (ie, --flags); pa5.tmpP,
+to hold all of the specific input lines that encode as "P"; and pa5.tmpC, to 
+hold all of the specific input lines that encode as "F" (ie, flags that only
+need one Character). (I called it pa5.tmpC instead of pa5.tmpF, because I want
+to later use "F" for filenames.)
+But there is one part that needs to be modified by you:
+
+__18__: tail -1 pa5.tmp4 | sed s____
+        This sed s command removes the first character from the pattern space.
+	We do this because this first character is a "-", not really one of
+	the actual flags.
+
+So, to summarize:
+  pa5.tmp3:  |Code:| pa5.tmpL:  | pa5.tmpP:    | pa5.tmpC:  |
+  -now       |  F  | -%-color   | 42   <for now| now        |
+  -%B        |  A  |            | fle* <for now| wi         |
+  42         |  P  |            | [0-9][0-9]*  |            |
+  -wi        |  F  |            |              |            |
+  -%f        |  A  |            |              |            |
+  fle        |  P  |            |              |            |
+  -%-color   |  L  |            |              |            |
+  [0-9][0-9]*|  P  |            |              |            |
+Looking at the above, notice 2 things. First, notice that some lines from the 
+pa5.tmp3 file did not get sent to any of the 3 files shown. This is because
+these lines go somewhere else, once we've implemented the rest of this script.
+Second, notice that the pa5.tmpP file has two elements labelled "for now". 
+This is because they are not actually going to go into this file. What I mean
+is: if you test the program up to this point, without implementing the rest of
+the code, then both of these elements will go into the pa5.tmpP file; but, if 
+you implement the rest of the code, you will find that they do actually go 
+somewhere else (for reasons that are described below).
+
+
+Moving on:
+% head -40 pa5.template|tail -3
+    case "D":
+      echo "Error: the `__19__` flag requires a value."
+      exit 2
+
+__19__: Here, there are two possible flags that could produce this error. They
+        are "d" and "D". Notice that we know the code is "D", but that does not
+        mean that the user typed "D" (instead of "d").
+        What the __19__ needs to do is to extract the letter from the last line
+        of the pa5.tmp4 file.
+
+
+Moving on, we want to handle the "A" type. The issue for this type is that they
+need to also collect the next line, because a value is needed (and that value
+is known to be on the next line). So here is the plan of how we will do it:
+
+To begin, note that the code that has been assigned to the next element is
+meaningless, because it is a string that should not get encoded. So we can
+change the code of that next element. Will change it in this way:
+If the flag was e, f, or M, then replace the next code with e, f, or M. 
+Otherwise, replace with X. Notice that, if we make this change now, then, when
+then next iteration begins, we will have already changed it. And that is why we
+had earlier said "for now" we describing the contents of pa5.tmpP. Let's update
+these codes and see how the earlier table will be rewritten:
+
+  pa5.tmp3:  |OldCode:| NewCode:|pa5.tmpL: | pa5.tmpP:    | pa5.tmpC:  |
+  -now       |   F    |    F    |-%-color  | [0-9][0-9]*  | now        |
+  -%B        |   A    |    A    |          |              | wi         |
+  42         |   P    |    X    |          |              |            |
+  -wi        |   F    |    F    |          |              |            |
+  -%f        |   A    |    A    |          |              |            |
+  fle        |   P    |    f    |          |              |            |
+  -%-color   |   L    |    L    |          |              |            |
+  [0-9][0-9]*|   P    |    P    |          |              |            |
+
+
+The values of "X" and "f" no longer match to any of the cases on lines 32-37
+of the template.
+
+That's the plan. But it has one problem: what if there is no next-element?
+Well that is an error, but we should print an error message rather than just
+crashing. So the first part of our implementation deals with that:
+
+% head -46 pa5.template|tail -6
+    case "A":
+      __20__
+      if ( __21__ ) then
+        echo __22__
+        exit 2
+      endif
+
+__20__: This creates a variable whose value is one more than i.
+
+__21__: This checks to see if this the last element of the array.
+
+__22__: This prints an error message about the flag needing a value. You must
+        use the `__19__` code inside your message, to identify the unfinished 
+        flag.
+
+
+Moving on, we now turn the next element into M, e, f, or X, accordingly:
+% head -56 pa5.template|tail -10
+      if ( __18__ == M ) then
+        set __23__ = M
+      else if ( __18__ == e ) then
+        set __23__ = e
+      else if ( __18__ == f ) then
+        set __23__ = f
+      else
+        set __23__ = X
+      endif
+      breaksw
+
+__18__: This is the same as the code that used back on Line 34.
+
+__23__: This changes the next element of the array, using the variable created 
+        by __20__.
+
+
+In the lines above, we've introduced codes M, e, f, and X. So we need to add
+cases for these. Let's do it:
+
+% head -67 pa5.template|tail -11
+    case "M":
+      set MAX_LINES = `tail -1 pa5.tmp4`; breaksw
+    case "e":
+      __24__ >> pa5.tmpE; breaksw
+    case "f":
+      __24__|sed 's/-f//' >> pa5.tmpF; breaksw
+    default:
+      __24__ >> pa5.tmpL;
+  endsw
+end
+
+%
+
+__24__: Realize where we are. We are on the second line of a two-line flag.
+        The line above this line holds the flag, and this line holds the value.
+        These two lines are in fact the bottom two lines of the pa5.tmp4 file.
+        We want to bring these two lines together into one new line, which gets
+        directed to one of three files (pa5.tmpE, pa5.tmpF, & pa5.tmpL, as 
+        indicated in lines 60, 62, and 64 of the template file). Among these 3
+        files, pa5.tmpL is a little illogical, since this is not a --flag. But
+        it is similar and the method works.
+        
+        So, how to bring them into one line? That is to say: What is __24__?
+        It it is three piped commands:
+          tail _a_ | tr _b_ | sed 's_c_'
+          _a_: Get the last 2 lines of pa5.tmp.
+          _b_: Delete the newline.
+          _c_: Insert a newline at the end of the pattern space. 
+
+Also, note the MAX_LINES variable is not going to be used in this assignment,
+but, rather, in the next one.
+
+
+We've now finished processing pa5.tmp3. But we need to handle all of the new 
+files that we've created. We'll start with pa5.tmpC. Recall the example:
+
+User types:                                      |  pa5.tmpC:  |
+./XLgrep -nowB 42 -wiffle --color "[0-9][0-9]*"  |  now        |
+                                                 |  wi         |
+
+From this example, see that there are five flags (w is repeated) spread across
+two lines.
+
+Let's begin processing the file:
+% head -68 pa5.template|tail -1
+set F = `cat pa5.tmpC | tr __25__ | sed __26__`
+%
+
+__25__: These are all, necessarily, single-character flags, so a natural first
+        step of analyzing these flags is to get into one single sequence of 
+        characters. In the above case, that would be "nowwi". 
+
+__26__: We want to create a legal-syntax grep multi-flag argument. This just
+        means putting a "-" at the front.
+
+At this point, "echo _$F" should yield "_-nowwi". (Notice how I used a _ before
+the $F, so as not to confuse echo that -nowwi was meant to be flags for that
+echo command.)
+
+Now that we have all of the one-character flags in one variable, we can test it
+for illegal flags. That is the job of the following code:
+
+% head -78 pa5.template|tail -10
+if ( __27__ ) then
+  echo __28__
+       
+  exit 2
+else if ( __29__ ) then
+  echo __30__
+
+  exit 2
+endif
+
+%
+
+__27__: This checks for any flag that is unrecognized by grep. Specifically, I
+        mean my version of grep. I checked its man page and I found that these
+        are [JKNOQSWXYgjkpt]. (There is also M, but I've added that one to 
+        XLgrep.)
+        As an extra requirement, you can't use `` in __27__. Instead you must
+        do it in Cshell. As a note about that, I will say that [^] and [a-c]
+        don't behave as you would expect, but [JKNOQSWXYgjkpt] works fine.
+        As a hint, I'll remind you that $F begins with a "-" (and that means
+        you have to take care when you put it in the if-clause, as you did in
+        previous homeworks).
+
+__28__: This will give an error message that indicates that flags were used
+        which grep does not support. All such flags should list, with commas
+        between them. A repeated flag (like "w" in our example) can appear 
+        twice in the list.
+        (The reason that I have an empty line below __28__ is that my echo went
+        onto two lines -- ie, I used a "\" at the end of the first line.)
+
+__29__: This checks for any flag that is unrecognized by XLgrep, but would have
+        been allowed by grep. These are: [DEFHILPRTUZbdlqrz]. It is similar to
+	__28__
+
+__30__: This will give an error message that indicates that flags were used
+        which XLgrep does not support. The message should explain that these
+	flags would have been supported by grep. All such flags should list,
+	with commas between them. This is similar to __28__, and also has an
+	empty line below it as well, for the same reason as for __28__.
+
+
+
+Going on, lines 79-95 will deal with the regular expression.
+The basic rules are:
+  - You must give a regular expression
+  - You cannot give more than one (this is an XLgrep rule, not grep)
+  - If you don't indicate which parameter is the regular expression, then grep
+    considers that it is the first non-flagged argument supplied.
+    If you use -e, then that will be the expression.
+
+For example, RE is the regular expression in each of the following cases:
+% XLgrep -i RE X
+% XLgrep -if X RE
+% XLgrep -eRE X
+% XLgrep -i X -ie RE 
+
+So let's get started looking at it:
+
+% head -79 pa5.template|tail -1
+head -3 XLgrep | tail -1 > pa5.tmpX
+%
+
+The pa5.tmpX file is weird. But it is a weirdness that we are familiar with.
+Notice that it is putting the third line if the XLgrep file into pa5.tmpX. This
+is one of three lines that will comprise the sed program. Do you remember when
+we talked about it above?:
+% head -3 pa5.template
+#!/usr/bin/tcsh
+if ( 0 ) then
+__1__;__1__;s/
+
+Remember? It is part of a sed file. It had to be weird because we don't want
+to use "echo" on our regular expression. Hey! We said, above, that "lines 79-95
+deal with the regular expression." So it's not really a surprise that the weird
+part happens here. 
+
+
+Let's move on:
+% head -83 pa5.template|tail -4
+set NumOfExpressions = `__31__`
+if ( $NumOfExpressions > 1 ) then
+  echo __32__
+  exit 2
+
+__31__: Finds how many lines are in the pa5.tmpE file.
+
+__32__: Print an error that XLgrep doesn't support multiple regular expressions
+
+
+Moving on:
+% head -85 pa5.template|tail -2
+else if ( $NumOfExpressions == 1 ) then
+  cat pa5.tmpE | sed 's/-e//' | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+%
+
+The above code is weird, but not unfamiliar. It is doing the same thing that
+the last homework did -- passing a regular expression through pa4.sed, to
+create a multiline version. This then goes into pa5.tmpX, as the second part
+of the weird sed program.
+
+But what if there were no lines in the pa5.tmpE file? (This can easily happen,
+because grep does not require the use of -e. In that case, grep will use the
+first non-flagged argument)
+
+Let's look at that part:
+% head -89 pa5.template|tail -4
+else if ( __33__ ) then
+  head -1 pa5.tmpP | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+  tail -n `cat pa5.tmpP|wc -l|xargs expr __34__` pa5.tmpP > pa5.tmp7
+  mv pa5.tmp7 pa5.tmpP
+
+__33__: Check to see if the pa5.tmpP file is not zero size.
+
+__34__: The goal of lines 88 & 89 is to update the pa5.tmpP file, to remove
+        the first line. With more knowledge of sed, this would be easy. But
+	without that knowledge, we instead have to do it the indicated hard
+	way. The __34__ is the mathematical expression that will be one-less
+	than the piped-in number. (Since this answer becomes an argument to
+	tail, we will, in effect, remove the first line.) The trouble is:
+	  - You can't do x - 1, because xargs forces the "x" to the right side
+	  - You can't do -1 + x, because the -1 will look like an expr flag
+	  - But you can make a slightly longer expression that gives the value
+	    you want.
+
+Moving on:
+% head -96 pa5.template|tail -7
+else
+  echo "Error: You must supply a regular expression."
+exit 2
+endif
+head -4 XLgrep | tail -1 >> pa5.tmpX
+cat pa5.tmpX | tr -d "\n" > pa5.sed
+
+%
+
+So now the pa5.sed file has been made. If run on an input file, it will put the
+{, }, | symbols in the right places. So the next step is to figure out what the
+file name is. That is the job of lines 97-107.
+
+Now as for the place to get the filename, there is a priority list of 3 places:
+1. From a filename indicated by the -f flag
+   Eg.  grep d -fFN
+        grep -f FN re -i
+
+2. From a general Parameter (after the regular expression gets its chance to
+   take one):
+   Eg.  grep -w d FN
+        grep FN -ere
+
+3. From stdin.
+   Eg.  cat FN | grep d -i -w
+        cat FN | grep -ere -w
+
+
+The first two of the cases can be handled together, as shown here:
+% head -99 pa5.template|tail -2
+cat pa5.tmpP >> pa5.tmpF
+set __35__ = __36__
+%
+
+The above line handles the fact that the general parameters are the second
+place to look. If the pa5.tmpF file had been empty, then the pa5.tmpP line(s)
+would be at the top now.
+__35__: This is a variable name
+__36__: This is the number of lines in pa5.tmpF
+
+So now, Let's look at how we do it:
+% head -108 pa5.template|tail -10
+if ( __35__ > 1 ) then
+  echo "Error: XLgrep does not allow multiple filenames."
+  exit 2
+else if ( __35__ == 1 ) then
+  set filename = `cat pa5.tmpF`
+else
+  set filename = tempfile.in
+  __37__
+endif
+
+__37__: This redirects stdin to go into the file named "tempfile.in".
+
+
+Moving on:
+% head -110 pa5.template|tail -2
+echo > pa5.tmp0
+cat $filename pa5.tmp0 pa5.tmp0 |sed -f pa5.sed | head -n `cat $filename | wc -l` pa5.tmp8
+
+The above code places two empty lines at the end of the file, then runs the sed
+program that we created on line 95. The resulting answer still has two extra
+lines at the end. So the head command is used to remove those two lines. The
+result goes to pa5.tmp8
+
+
+Moving on:
+% head -112 pa5.template|tail -1
+set __38__ = __39__
+
+__38__: A new variable
+__39__: An array of all of the values in pa5.tmpL
+
+Moving on:
+% head -115 pa5.template|tail -3
+grep $F $__38__ -e __40__  -e "__41__" -e "__42__" pa5.tmp8
+
+exit
+%
+
+__40__: A regular expression that matches the a {...} pair within one line.
+        Note: "echo 'a{b}c{d}e{f}g' | grep -o -e __40__ | wc -l" will yield "3"
+	      if you do it right.
+
+__41__: A regular expression that matches to a {...| pair at the end of a line.
+
+__42__: A regular expression that matches to a everything from the beginning of
+        a line to a "}", if there are no "{" symbols in front of it.

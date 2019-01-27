@@ -1,0 +1,8 @@
+#!/usr/bin/tcsh
+cp  cp ~/pa3assignment/pa3assignment/pa3/items/* $PWD/* ~/pa3assignment/pa3assignment/pa3/ >& ~/X
+if ( -e $1 ) then
+echo "yes"
+rm  ~/pa3assignment/pa3assignment/pa3/*
+else 
+echo "I see nothing special about that."
+endif

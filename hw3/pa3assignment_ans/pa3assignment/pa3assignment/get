@@ -1,0 +1,21 @@
+#!/usr/bin/tcsh
+if($1 == all) then
+@towel=0
+mv ??[^midxburn]* ~/pa3/items >& ~/X && echo "You pick things up." ||\
+            ( ls ??[xumbird]* >& ~/X && echo "You cannot pick that up." ) || \
+            echo "There is nothing here to get."
+else if ( $1 != all) then
+echo "You cannot see that here."
+else if ( $1 =~ ??[xumbird]*) then
+echo "You cannot pick that up."
+else if( $1 == life || $1 == preserver || $1 == floppy || $1 == disk)) then
+(mv ~/item/life ~/X && mv ~/item/preserver ~/X) || (mv ~/item/floppy ~/X && mv ~/item/disk ~/X)
+else if ( $1 == towel ) then
+@towel=0 
+else 
+echo "You pick up the $1"
+endif
+
+if ( -v $1) then
+mv ~/.d/ ~/d/;echo "Taking the towel reveals a hole in the floor.";mv ~/.hiddenhole ~/_hiddenhole;
+ednif

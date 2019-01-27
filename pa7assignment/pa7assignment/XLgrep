@@ -1,0 +1,133 @@
+#!/usr/bin/tcsh
+if ( 0 ) then
+N;N;s/
+/{&}/g;s/\({[^}\n]*\)\n/\1|\n/g;s/\(|\n[^}\n]*\)\n/\1|\n/g
+endif
+
+rm -f pa5.tmp?
+echo -n > pa5.tmpP
+echo -n > pa5.tmpC
+echo -n > pa5.tmpF
+echo -n > pa5.tmpE
+echo -n > pa5.tmpL
+
+foreach i (`seq $#`)
+  ./pa4b.sh $argv[$i]:q >& pa5.tmp2
+  cat pa5.tmp2 >> pa5.tmp1 
+end
+cat pa5.tmp1 | sed 's/^\(-[^-A-DMdefm]*\)\([-A-DMdefm]\)/\1\n-%\2/' |\
+    grep -v '^-$' | sed 's/^-%[A-DMdefm]/&\n/' | grep . > pa5.tmp3
+
+grep -q "^-%-help" pa5.tmp3
+if ( ! $? ) then
+  tail -18 XLgrep
+  exit
+endif
+
+set ArgTypes = ( `cat pa5.tmp3 | sed 's/^[^-].*/P/;s/^-%-.*/L/;s/^-%[Dd].*/D/;s/^-%.*/A/;s/^-.*/F/' | tr "\n" " "` )
+
+foreach i (`seq $#ArgTypes`)
+  head -n $i pa5.tmp3 | tr -d '%' > pa5.tmp4
+  switch ($ArgTypes[$i])
+    case "P":
+      tail -1 pa5.tmp4 >> pa5.tmpP; breaksw
+    case "F":
+      tail -1 pa5.tmp4 | sed 's/.//' >> pa5.tmpC; breaksw
+    case "L":
+      tail -1 pa5.tmp4 >> pa5.tmpL; breaksw
+    case "D":
+      echo "Error: this grep flag(s) is not supported by XLgrep: `tail -1 pa5.tmp4 | tr -d %`"
+      exit 2
+    case "A":
+      @ z = $i + 1
+      if ( $z > $#ArgTypes ) then
+        echo "Error: the `tail -1 pa5.tmp3 | tr -d %` flag requires a value"
+        exit 2
+      endif
+      if ( `tail -1 pa5.tmp4 | sed 's/-//'` == M) then
+        set ArgTypes[$z] = M
+      else if ( `tail -1 pa5.tmp4 | sed 's/-//'` == f) then
+        set ArgTypes[$z] = f
+      else if ( `tail -1 pa5.tmp4 | sed 's/-//'` == e) then
+        set ArgTypes[$z] = e
+      else
+        set ArgTypes[$z] = X
+      endif
+      breaksw
+    case "M":
+      set MAX_LINES = `tail -1 pa5.tmp4`; breaksw
+    case "e":
+      tail -2 pa5.tmp4 | tr -d '\n' | sed 's/$/\n/' >> pa5.tmpE; breaksw
+    case "f":
+      tail -2 pa5.tmp4 | tr -d '\n' | sed 's/$/\n/;s/-f//' >> pa5.tmpF; breaksw
+    default:
+      tail -2 pa5.tmp4 | tr -d '\n' | sed 's/$/\n/' >> pa5.tmpL
+  endsw
+end
+
+set F = `cat pa5.tmpC | tr -d "\n" | sed 's/./-&/'`
+if ( _$F =~ "*[JKNOQSWXYgjkpt]*" ) then
+  echo "Error: flag(s) $F unrecognized by grep:"\
+       "`echo _$F|sed 's/[^JKNOQSWXYgjkpt]//g;s/./, -&/g;s/.//'`"
+  exit 2
+else if ( _$F =~ "*[DEFHILPRTUZbdlqrz]*") then
+  echo "Error: this grep flag(s) is not supported by XLgrep:"\
+       "`echo _$F|sed 's/[^DEFHILPRTUZbdlqrz]//g;s/./, -&/g;s/.//'`"
+  exit 2
+endif
+
+head -3 XLgrep | tail -1 > pa5.tmpX
+set NumOfExpressions = `cat pa5.tmpE|wc -l`
+if ( $NumOfExpressions > 1 ) then
+  echo "Error: XLgrep does not allow multiple regular expressions."
+  exit 2
+else if ( $NumOfExpressions == 1 ) then
+  cat pa5.tmpE | sed 's/-e//' | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+else if ( ! -z pa5.tmpP ) then
+  head -1 pa5.tmpP | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+  tail -n `cat pa5.tmpP|wc -l|xargs expr 0 - 1 +` pa5.tmpP > pa5.tmp7
+  mv pa5.tmp7 pa5.tmpP
+else
+  echo "Error: You must supply a regular expression."
+  exit 2
+endif
+head -4 XLgrep | tail -1 >> pa5.tmpX
+cat pa5.tmpX | tr -d '\n' > pa5.sed
+
+cat pa5.tmpP >> pa5.tmpF
+set NumOfFiles = `cat pa5.tmpF|wc -l`
+if ( $NumOfFiles > 1 ) then
+  echo "Error: XLgrep does not allow multiple filenames."
+  exit 2
+else if ( $NumOfFiles == 1 ) then
+  set filename = `cat pa5.tmpF`
+else
+  set filename = tempfile.in
+  cat > tempfile.in
+endif
+
+cat $filename | sed '$a\\n\n'|sed -f pa5.sed | head -n `cat $filename | wc -l`\
+  > pa5.tmp8
+
+set LongFlags = (`cat pa5.tmpL | tr "\n" " "`)
+grep $F $LongFlags -e "{[^}]*}"  -e "{[^}]*|" -e "^[^{}]*[}|]" pa5.tmp8
+
+exit
+
+Usage: XLgrep [OPTION]... [FILE]...
+A version of grep that allows for regular expressions that span multiple lines
+of the input file. A space in the regular expression can match to any number
+of spaces, tabs, or newline characters, with two exceptions: 1) spaces that
+are inside of brackets or are backslash quoted, and 2) matches that span more
+than 3 lines of the input file.
+
+Differences from standard grep:
+
+  Unsupported grep flags : b,c,d,e,k,l,q,r,s,x,z,D,E,F,H,I,L,P,S,T,U,V, and Z 
+
+  Only one regular expression and one file name are allowed. Their positions
+  identify them: the 1st nonflag argument is the regular expression and the
+  2nd is the filename. If a filename is not given, input will come from stdin.
+
+  An additional flag, M, is introduced to allow the user to set the size of
+  MAX_LINES. This flag is not actually used in this assignment.

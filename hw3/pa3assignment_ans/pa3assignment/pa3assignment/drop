@@ -1,0 +1,12 @@
+#!/usr/bin/tcsh
+foreach item ($argv)
+if ( -f $item == life || $item == preserver ) then
+mv ~/item/life  ~/X && mv ~/item/preserver ~/X
+else if ( -f $item == floppy || $item == disk ) then
+mv ~/item/floppy  ~/X && mv ~/item/disk ~/X
+else if ( !(-f ~/item/* ) then
+echo "You are not holding that."
+else 
+echo "Dropped."
+endif
+end

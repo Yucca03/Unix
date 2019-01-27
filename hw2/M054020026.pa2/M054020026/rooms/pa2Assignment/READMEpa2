@@ -1,0 +1,613 @@
+                         UNIX System Programing
+                        Programing Assignment #2
+                        "u, n, i, but not yet x"
+
+
+Due: Monday, March 27  at  9:00 am.
+
+Submission method: You will post to the course website, just like the previous
+                   assignment. 
+
+Submission rules: I REQUIRE you to FOLLOW THESE RULES:
+
+                  1. Submit one file named "<your student ID>.pa2.tar"
+
+                  2. Submissions made after the deadline will be ignored.
+                     (That means, no late submissions on this assignment.)
+                     (By the way, if you don't turn in your assignments, you
+                      will probably Fail The Class. That's a Fact. So start
+                      early and ask questions.)
+                  
+                  This is a large class. Unless each of you follows the above
+                  rules, the TAs' work becomes so hard. So I INSIST that you 
+                  FOLLOW the above rules. If you don't, we won't accept your 
+                  homework.
+
+                  If you have questions about these rules, you may post your 
+                  questions to the course website.
+
+
+Getting help:   - The Professor has office hours on Monday from 12:30-2:30, 
+                  and on Friday from 10:00-12:00, in room 9037.  He can also 
+                  be reached by email.
+                - The TAs are also available to answer your questions.
+                - Questions about the assignment can be posted to the 
+                  Discussion Forum.
+                - You may also discuss the ideas of the assignment with your
+                  classmates. Such discussions can be quite helpful to your 
+                  learning -- IF you ONLY talk about the general concepts of
+		  the steps of the assignment.
+		  - If, however, you tell other students the specific details
+		    of your implementation, then you are not helping each other
+		    to learn; you are just doing the work for them.
+                    In other words, you are cheating. You CANNOT show another
+		    student ANY part of the answer to the assignment.
+
+Cheating policy:  We encourage students to form study groups. But this does not
+                  mean sharing code. If students are found to be sharing work,
+		  they can receive a 0 for the entire course, or worse.
+                  It is cheating to let another student see your work, or to 
+                  let them look over your shoulder when your code is on the
+		  screen.
+		  A good way to know you cheated: if you have code that is in
+		  your solution just because another student told you to put
+		  it there, but you don't actually understand it.
+		  If you are still unsure, you can ask the TA for more
+		  explanation.
+                  We always look for evidence of cheating, so don't do it.
+                  (In any event, even if you do not get caught, those who 
+                  copy the homework will not learn the material, so they 
+                  will fail the exam.)
+
+Most Important    The programming assignments are a large part of the grade.
+Things to Know:	  This large point value means that, if you don't do them, you
+		  will fail.
+		  The large point value also explains why the policy against
+		  cheating is strictly enforced.
+		  
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+Assignment Summary:
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 1. The Concept of the Assignment :
+'''''''''''''''''''''''''''''''''''''''''
+
+In a previous post, I provided an overview of the game. That file is also
+included in the tarball that you must have unpacked in order to be currently
+reading this README file. But in this unpacked directory, I have renamed that
+file as "READMEoverview". To begin this assignment, read that file.
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 2. Provided files :
+''''''''''''''''''''''''''
+
+If you are reading this file, then you must have untarred the assignment.
+Looking in the untarred directory, you will see:
+% ls
+cave  expectedDirectoryContents  provided.tar  READMEoverview  READMEpa2
+
+If you have read the READMEoverview file, then you know what the "cave" file
+is for, also.
+
+Now, as for the expectedDirectoryContents file, I produced it by typing:
+% cd
+% rm -rf pa2
+% tar -xvf rooms.tar
+% find pa2 -name "*" > expectedDirectoryContents
+
+Note that, in the above, the rooms.tar file is created by you. It will hold a
+copy of how items are arranged upon game startup. (This why we remove any
+previous directory which could correspond to a game that has already been
+played, with the objects being moved around.)
+Note also, slides 63-68 of lecture 2 discuss the find command.
+
+There are 2 reasons why I have provided you the expectedDirectoryContents file:
+1. So that you can see where you should put which objects.
+2. So you can use diff to compare your answer to mine, and verify that you did
+   it correctly.
+
+Now, as for the provided.tar file, it is an improved homework 1 solution.
+You see: homework 1 was very early, after just 1 week of class. We did not know
+much. We didn't even know the tar command. But that assignment did make you
+familiar with some of the things that will be used in this new assignment (eg,
+the use of aliases). That being said, we really don't want to create the
+directories by using an alias, because creating a directory structure is
+precisely what tar is designed for. So, this time, we'll use tar. In fact, I've
+done much of the work for you, as you will see in the next paragraph...
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 3. The first step of your solution: Creating rooms.tar :
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Try typing:
+
+% tar -xvf provided.tar > outinfo
+% head outinfo
+pa2/
+pa2/items/
+pa2/items/.platinum
+pa2/items/.sleep
+pa2/items/axe
+pa2/items/bed
+pa2/items/boulder
+pa2/items/box
+pa2/items/bracelet
+pa2/items/cable
+%
+
+From the above, we see that I have put all of the objects in the items folder.
+You just have to move them to their correct directories (except for objects
+like the bracelet, above, that you start out already carrying -- these you
+leave in the items directory). By moving these items, you will gain experience
+with using paths in the mv command (See slide #57 of Lecture 1). 
+
+Let's look at some more:
+% head -39 outinfo > tempfile
+% tail tempfile
+pa2/start/
+pa2/start/9
+pa2/start/contents
+pa2/start/e/
+pa2/start/e/9
+pa2/start/e/contents
+pa2/start/e/n/
+pa2/start/e/n/9
+pa2/start/e/n/contents
+pa2/start/e/n/d/
+
+From the above, we see that I've already put the room descriptions and the
+files named "9". So you don't have to do that.  What you do have to do is to
+1) fix a few problems, and to 2) add some symbolic links.
+
+
+Fix a few problems? Well, if you look at slide #123 of the FINAL VERSION
+of lecture 2, named USP17_L2final.pptx, then you will find a picture of the
+directory structure for the rooms in the game. Look at that picture right now.
+I'll wait. ... No, I'm waiting. Go look at that slide.
+
+On that slide two of the rectangles are colored red. These two were not part
+of homework 1 (because I forget them). They are part of the game, however. So
+I want you to add them. (I could have added them directly to the provided tar
+file, but I thought that it would be good experience for you to do it. By doing
+it, you will learn that directories can be moved about just like files can.
+When you create these 2 new rooms, you'll have to give them: the proper
+subdirectories, the empty file named "9", and the "contents" file. To save you
+a little effort, I have temporarily put these contents into the items directory
+(obviously, you'll need to rename them and move them to your new directories):
+% head -14 outinfo > tempfile
+% tail -4 tempfile
+pa2/items/computer
+pa2/items/contentsOfRoomNumber1.5
+pa2/items/contentsOfRoomNumber24.5
+pa2/items/diamond
+
+
+Add some symbolic links? In READMEoverview, you saw how the game uses symbolic
+links to accomplish merge points. But we also need them for going up stairs --
+if that means going to .. (eg, room 6 but not room 24). The reason for adding
+this extra rule is that up is the only potentially one-way movement in the
+game (ie, you cannot go up through a hole, though you can go up stairs).
+
+Looking on slide 123, we exactly where these links need to be added. When you
+add these links USE ABSOLUTE ADDRESSING.
+
+Once you have done these things, you can use the method described earlier in
+this document, to use find and diff to compare your answer to my provided
+expectedDirectoryContents file.
+
+Then tar up your answer as "rooms.tar" (see slide 70 of Lecture 2).
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 4. The rest of your solution: Creating alias file, <your ID>.pa2 :
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Line 1: Slides 29-30 of Lecture 2 point out that you can suppress output, such
+        as error messages, by sending it to a file. Slide 31 goes on to point
+	out that UNIX provides /dev/null as a special place to throw away junk.
+	We covered this idea in class, but you should run the revised lecture
+	notes, because I improved how I presented the idea.
+
+	Anyway, line #1's purpose is to create a symbolic link to /dev/null.
+	We want to do this because our aliases are going to send so many things
+	to /dev/null that you will get tired of typing it. So it is easier to
+	Created a link in your home directory. Call the link X. Then you can
+	send things to /dev/null by just typing "~/X".
+
+	Line 1 is not an alias. It directly creates the link. But first it
+	removes ~/X, so that the link can be guaranteed to create. Note: the
+	~/X file may or may not previously exist. You should use the correct
+	flag to make it never complain if ~/X does not exist and to never ask 
+	before removing.
+
+	Line 1 uses:
+	  rm (See Slide #60 of Lecture 1)
+	  ln (See Slide #61 of Lecture 2)
+	  ;  (See Slide #85 of Lecture 2)
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 2: alias nogo='echo "You cannot go that way."'
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 3: alias l='___1___; ___2___; ___3___'
+        The purpose of this alias is to display the description of the room and
+	any get-able objects. This "l" command is different than the "look"
+	command (that will be defined on Line 4). The difference is that "look"
+	always displays the entire "contents" file, where as "l" may display
+	only the first line (when you've been in the room before).
+
+	So, how does it work? It has 3 distinct parts (separated by ";"):
+
+	___1___: This part displays the relevant portion of the content file.
+		 And what is the "relevant" portion?
+		 
+		 If you have never entered the room before, then a file named
+		 "9" will exist in this directory. The relevant portion, in
+		 this case, is the entire file. But, since no room's "contents"
+		 file is longer than 9 lines, we can rephrase the previous
+		 sentence: The relevant portion is the first 9 lines of the
+		 file.
+		 
+		 If, however, you have entered the room before, then a file
+		 named "1" will exist in this directory. The relevant portion,
+		 in this case, is just the first line of the "contents" file.
+
+		 Hint: You will need to use the -n flag. A real actual letter
+		       n. See the man page for details about this flag.
+
+	___2___: This part displays the get-able objects. The full set of
+		 Get-able objects is: axe, bracelet, diamond, disk, floppy,
+		 gold, key, life, paper, preserver, shovel, and towel.
+
+		 When looking at this list, you protest that an object like
+		 the bracelet is not get-able, because you start the game with
+		 it already gotten. The reason that the object is getable is
+		 that assignment #3 will introduce the ability to drop objects.
+		 If we were to drop it, then we would be able to get it again,
+		 so your object display should handle it.
+
+		 For example, consider the following:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>cd e/e/n/d/d/sw/e/
+>u
+Horseshoe boulder room
+You are in a room which is bare, except for a horseshoe shaped boulder
+in the center.  Stairs lead down from here.
+>ls -A
+.platinum  1  boulder  contents  horseshoe
+>mv ~/pa2/items/bracelet ~/pa2/items/paper ~/pa2/items/key .
+>ls -A
+.platinum  1  boulder  bracelet  contents  horseshoe  key  paper
+>l
+Horseshoe boulder room
+Here there is:
+A bracelet
+A brass key
+A slip of paper
+> dig
+I think you found something.
+>l
+Horseshoe boulder room
+Here there is:
+A bracelet
+A brass key
+A slip of paper
+A platinum bar
+>
+		Notice, in the above, that the bracelet, key, paper, and
+		dug-up platinum all list when the "l" command is typed.
+		But the horseshoe shaped boulder does not display, because it
+		is not getable.
+
+		Now, there is a caveat to the idea of displaying all get-able
+		objects. That caveat is that there are two get-able objects
+		which have synonyms: floppy/disk and life/preserver.
+
+		When you implement drop in the next assignment, dropping either
+		synonym will drop both things. In other words: if your room
+		contains the "floppy" file, it will certainly also contain the
+		"disk" file.
+
+		Now this present assignment doesn't implement "drop". But that
+		does not stop us from moving the files by hand (provided that
+		we remember to move the pair together). Let's see how "l" is
+		affect by doing this:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> l
+Misty Room
+Here there is:
+A gold bar
+> mv ../items/floppy ../items/disk .
+> mv ../items/life ../items/preserver .
+> ls -A
+1  contents  disk  e  floppy  gold  life  preserver
+> l
+Misty Room
+Here there is:
+A floppy disk
+A gold bar
+A life preserver
+>
+
+		Notice that the floppy/disk is just one item, so it only
+		displays once. Similarly, life/preserver only displays once.
+		The solution to this is to say that, even though both life
+		and preserver are get-able, one of them (life) won't display.
+		And, similarly, disk won't display.
+
+		So, the revised list of display-able is:
+		        axe, bracelet, diamond, floppy, gold, key,
+		        paper, preserver, shovel, and towel.
+
+		And, by the way, the list of all nondisplayable files is:
+		        .platinum, .sleep, bed, boulder, box, cable, computer,
+			drive, horseshoe, ibm, painting, PC, urinal, 1, 9, n,
+			s, e, w, u, d, ne, se, nw, sw, and contents.
+
+		So, I ask you, can you find a pattern that matches everything
+		in the first list and nothing in the second list?
+		Hint: Create a test directory and put all of the above files
+		      into that test directory. The use ls with your wildcard
+		      pattern. If your pattern is correct, you will see exactly
+		      the displayable files listed.
+		Hint: See Slides 32-34 of Lecture 1.
+		Hint: Look at the third letter.
+		
+		OK. So now we know the objects to display.
+		Q: But how to display them correctly? I mean one of the objects
+		   is "gold", but it displayed (as can be seen above) as a
+		   message "Here there is" and the description "A gold bar".
+		A: The message "Here there is" needs to be printed whenever
+		   the room has a get-able object (and not otherwise). The
+		   "A gold bar" text is actually provided for you in the first
+		   line of the "gold" file (any lines after the first line are
+		   a description of the object for use in the next assignment;
+		   ignore them for now). Let's see what I mean:
+			  > l
+			  Misty Room
+			  Here there is:
+			  A gold bar
+			  >cat gold
+			  A gold bar
+			  I see nothing special about that.
+			  >
+			  
+		    So then, what does ___2___ become? First observe that there
+		    is conditional behavior: we sometimes print "Here there is"
+		    and we sometimes don't. You must use the && command
+		    coordination (see slides 86-103 of Lecture 2).
+
+		    The idea is:
+		      If there are get-able files in the current
+		        then say "Here there is"
+		          and display the first lines of the files.
+
+		    Q: How to know that there are getable files?
+		    A: Try to list them.
+		       Q2: I tried to list them and now it displays the word
+		           "gold" on the screen.
+		       A2: Well, we don't want to see that. We just want to
+		           know if it succeeds or fails (for use in the &&).
+			   See slides 29-31 of Lecture 2.
+			   Q3: OK, fine. Now it doesn't display "gold", but I
+			       get an error message when I enter a room with no
+			       objects.
+			   A3: Read slides 29-31 of Lecture 2 more carefully.
+			       Q4: OK, fine. I now print "Here there is:" in
+			       	   exactly the right rooms. But how to make the
+				   displaying of the object names conditional
+				   upon their presence (found by listing them)?
+			       A4: Consider how a chain of &&s works (see
+			           slides 87-92 of Lecture 2). Recognize that
+				   this echo command will always be successful.
+				   Q5: OK, OK. But I still have a problem that
+				       It prints extra junk ("===> ... <===")
+				       in addition to the first line of the
+				       get-able files.
+				   A5: Use man to look for a flag to make it
+				       never print file headers.
+				       
+	___3___: This removes the "9" file and creates the "1" file (unless
+	         the "9" has already been moved (in which case you don't want
+		 to see an error message).
+
+        So, let's recap. We were told that the form of the answer is
+	alias l='___1___; ___2___; ___3___'
+
+	Now, looking at my solution, I see:
+	     one ls, one echo, one mv, two heads, and two &&s
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 4: alias look='___1___; l'
+
+     	This line is pretty simple. We already have "l". The only problem is
+	that "l" does not always display all of the "contents" file -- but
+	"look" needs to display it all. The solution is just simply to make
+	"9" file appear, and then to run "l". In other words, you trick "l"
+	into thinking that it is the first time you entered the room.
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 5: alias n='basename `pwd -P` > ~/D; fgrep -_1_ s ~/D [2] cd .. [3] cd n && cd `pwd -P` [4] nogo [5] l'
+
+        The basic idea of moving north is to try to execute "cd n". If it is
+	successful, then that means that there is subdirectory named "n" (ie,
+	there is a room to the north.) Now, the n might be a link (eg, room 7),
+	but that won't stop "cd n" from working.
+	
+	But there are complications:
+	1. There might not be a room to the north, so we need an error message.
+	2. There might be a room to the north, but it might not be a
+	   subdirectory -- it might be the PARENT directory. This is difficult
+	   to deal with.
+	3. When you follow a link, the directory path becomes a linked path.
+	   What I mean is: "pwd"  and  "pwd -P" give different answers. Again,
+	   what I mean is: read the READMEoverview file again. It talks about
+	   this problem. It is the reason the "cd `pwd -P`" was inserted into
+	   the alias, as shown above.
+
+	_1_: This is a flag. It ensures that the "s", if found, in the ~/D file
+	     is not actually a "sw" or "se". (And why are we looking for an
+	     "s"? Why not a "n"? Answer: because it's a question about my
+	     CURRENT directory: if I am south of my parent directory, then my
+	     parent directory is NORTH of me.)
+	     To understand about fgrep and its flags, see slides 81-83 of
+	     Lecture 2. (Note slides 81-83 have been improved over what was
+	     presented in class.)
+	[2]: This is one of the command coordinators.
+	[3]: This is one of the command coordinators.
+	[4]: This is one of the command coordinators.
+	[5]: This is one of the command coordinators.
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Lines 6-13: These lines are like line 5, but for all of the other directions,
+            except for "u"	    
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 14: This line is for "u". It is similar to the other directions. But it is
+     	 simpler, because it does not to check whether the current directory
+	 is named "d". The reason that it does not need to check for this is
+	 that "up" is the one direction which is not symmetric: We can go down
+	 a hole, but not get back up.
+	 Now there are stairs that we can go up. But rooms like #25 are OK,
+	 because up is a subdirectory, not a parent. As for rooms like #6,
+	 this is why we created a "u" link. Look at slide 123 of Lecture 2,
+	 if you have forgotten. And recall how you designed the directories 
+	 for rooms.tar, as described earlier in this document.
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 15: This line is for "i". 
+         First, it prints that "You currently have:"
+	 Second, it list the items in the items directory. The pattern is just
+                 like the one used a part of the __2__ blank of line #3.
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 16: This line is for "getall".
+     	 The key challenge here is to give the right message:
+	 -M1: Tell the user that objects were picked up.
+	 -M2: Tell the user that there are objects, but they can't be picked up
+	 -M3: Tell the user that there are no things objects present.
+
+	 The logic of it is:
+	 1. Move the get-able objects into the items directory
+         2. If that succeeded, then print M1.
+	 3. Otherwise, see if some objects are present, and, if so, print M2
+	 4. Otherwise, print M3.
+
+	 In your solution, you will need to use parentheses. See Slides 105-112
+	 of Lecture 2 for details. Note: these are added slides that were not
+	 presented in class.
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 17: This line is for "sleep".
+         The logic is to try to print the .sleep file, and to print the "you
+	 cannot sleep" message if that fails.
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 18: This line is for "dig".
+         The logic is to try to rename the .platinum file, and to print the
+	 appropriate message -- "found something" or "found nothing."
+
+	 Now, there is a technicality -- you need to have the shovel. But
+	 that can wait for the next assignment. For now, we don't have "drop"
+	 implemented, so you'll always have the shovel. So, for now, we won't
+	 bother to test for it.
+        
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Line 19: alias game='__1__;cd pa2/start;clear;look;PS1=">"' 
+         The  part that I have given you here performs some basic operations
+	 to start the game. Two of these operations are new to you (and that
+	 is why I'm giving it to you): "clear" (which clears the screen), and
+	 "PS1=..." (which changes the prompt. If PS1 does not work for you,
+	 you may be using a different "shell". If so, you can ask the TA about 
+	 what that means).
+	 
+	 As for the __1__ part, it performs a variety of actions, all separated
+	 by semicolons.	 The goal is to clear out the pa2 directory structure
+	 (if it is there), and to unpack a fresh structure from your rooms.tar
+	 file. None of this should have any output.
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 5. What to submit :
+''''''''''''''''''''''''''
+At this point, you have created rooms.tar and <yourID>.pa2 (Of course, your ID
+is something like B104000001, etc.)
+
+Now:
+
+1. Create a directory called <yourID>. (Of course, your ID is something like
+   B104000001, etc.)
+
+2. Copy rooms.tar and <yourID>.pa2 into this new directory.
+
+3. Go to this new directory.
+
+4. Type "echo '__1__' > mycodename"
+
+   Here, __1__ is a code name.
+
+   Q:Why a code name?
+   A:So that I can post class grades to the website while keeping it anonymous.
+
+   Q:What are the rules for the code name?
+   A: 1. Nothing obscene or offensive
+      2. A string that would be a legal C variable (ie, all alphabetic letters,
+         numbers, and _s; no spaces or punctuation)
+      3. 5-9 characters long
+      4. Not easily identifiable as being you
+
+6. cd ..
+ 
+7. Tar up this new directory as <yourID>.pa2.tar
+
+8. cd -
+
+9. mv ../<yourID>.pa2.tar .
+
+10.Unpack <yourID>.pa2.tar to verify that you didn't make it wrong (every year,
+   someone does...) You'll know it packed correctly if it unpacks to make a
+   subdirectory called <yourID> (of course, your ID is something like
+   B104000001, etc.), and if that subdirectory contains your three files, and
+   if those files have no differences to the ones you packed up to start with.
+   In other words:
+   cd <yourID>; diff <yourID>.pa2 ..; diff rooms.tar ..; diff mycodename ..
+
+11.Submit "<yourID>.pa2.tar" to the cyber university, by the due date.

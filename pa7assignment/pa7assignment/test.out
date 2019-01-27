@@ -1,0 +1,88 @@
+./XXLgrep leagues beneath leagues.txt --color -n
+[0;32m4703[1;36m:[0mhave a mind to visit the ocean depths two or three vertical [1;31mleagues
+[0;32m4704[1;36m:[0m[1;31mbeneath[0m the surface, I use maneuvers that are more time-consuming
+./XXLgrep leagues beneath --color -n leagues.txt
+[0;32m4703[1;36m:[0mhave a mind to visit the ocean depths two or three vertical [1;31mleagues
+[0;32m4704[1;36m:[0m[1;31mbeneath[0m the surface, I use maneuvers that are more time-consuming
+./XXLgrep leagues beneath --color -no leagues.txt
+[0;32m4703[1;36m:[0m[1;31mleagues
+[0;32m4704[1;36m:[0m[1;31mbeneath[0m
+./XXLgrep leagues beneath --color -o leagues.txt
+[1;31mleagues
+beneath[0m
+./XXLgrep leagues beneath -io leagues.txt
+[0mleagues
+beneath[0m
+./XXLgrep leagues beneath leagues.txt
+have a mind to visit the ocean depths two or three vertical [0mleagues
+beneath[0m the surface, I use maneuvers that are more time-consuming
+./XXLgrep thousand .* beneath leagues.txt --color -n
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep leagues beneath -no
+[0m4703:[0mleagues
+[0m4704:[0mbeneath[0m
+cat F.tmp1 leagues.txt
+./XXLgrep leagues beneath -no
+[0m4704:[0mleagues
+[0m4705:[0mbeneath[0m
+cat F.tmp1 F.tmp1 leagues.txt
+./XXLgrep leagues beneath -no
+[0m4705:[0mleagues
+[0m4706:[0mbeneath[0m
+./XXLgrep \([0-9]\) \1 --color
+10[1;31m2
+2[0m0[1;31m3
+3[0m0[1;31m4
+4[0m0[1;31m5
+5[0m0[1;31m6
+6[0m0[1;31m7
+7[0m08
+./XXLgrep -e thousand .* beneath -f leagues.txt --color -n
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep -e thousand .* beneath leagues.txt --color -n
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep -f leagues.txt --color -n -e thousand .* beneath
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep leagues.txt --color -n -e thousand .* beneath
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep -f leagues.txt --color -nM7 -e thousand .* beneath
+[0;32m9130[1;36m:[0mOur lights produced a [1;31mthousand delightful effects while playing over
+[0;32m9131[1;36m:[0m[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,
+[0;32m9132[1;36m:[0m[1;31mmembrane-filled tubes trembling beneath[0m the water's undulations.
+./XXLgrep --color -n leagues .* under\> -B1 -M10 leagues.txt
+19464-of these seas, beneath which in less than ten months, I've cleared
+[0;32m19465[1;36m:[0m20,000 [1;31mleagues in this underwater tour of the world that has
+[0;32m19466[1;36m:[0m[1;31mshown me so many wonders across the Pacific, the Indian Ocean,
+[0;32m19467[1;36m:[0m[1;31mthe Red Sea, the Mediterranean, the Atlantic, the southernmost
+[0;32m19468[1;36m:[0m[1;31mand northernmost seas!
+[0;32m19469[1;36m:[0m[1;31m
+[0;32m19470[1;36m:[0m[1;31mBut what happened to the Nautilus?  Did it withstand
+[0;32m19471[1;36m:[0m[1;31mthe Maelstrom's clutches?  Is Captain Nemo alive?
+[0;32m19472[1;36m:[0m[1;31mIs he still under[0m the ocean pursuing his frightful program
+./XXLgrep --color -n leagues .* under\> -B1 -M6 leagues.txt
+echo These should complain:
+These should complain:
+./XXLgrep -f leagues.txt --color -nM7 -f thousand
+Error: You must supply a regular expression.
+./XXLgrep -f leagues.txt --color -nM7 -f thousand -e thousand
+Error: XLgrep does not allow multiple filenames.
+./XXLgrep -f leagues.txt --color -nM7 thousand thousand
+Error: XLgrep does not allow multiple filenames.
+./XXLgrep leagues.txt --color -nM7 thousand thousand
+Error: XLgrep does not allow multiple filenames.
+./XXLgrep -e leagues.txt --color -nM7 -e thousand
+Error: XLgrep does not allow multiple regular expressions.
+./XXLgrep leagues.txt --color -nD7 -e thousand
+Error: this grep flag(s) is not supported by XLgrep: D.7
+./XXLgrep leagues.txt --color -x -e thousand
+unset echo

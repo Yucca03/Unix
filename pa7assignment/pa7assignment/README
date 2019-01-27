@@ -1,0 +1,442 @@
+                            UNIX System Programming
+                           Programming Assignment #7
+			 XXLgrep: Cross-Extra-Lines Grep 
+
+Due: Friday, June 16  at  11:59 pm.
+
+Submission method: You will post to the course website, just like the previous
+                   assignments. 
+
+Submission rules: I REQUIRE you to FOLLOW THESE RULES:
+
+                  1. Submit one file named "<your student ID>.XXLgrep"
+
+                  2. Submissions made after the deadline will be ignored.
+                     (That means: no late submissions on this assignment.)
+                     (By the way, if you don't turn in your assignments, you
+                      will probably Fail The Class. That's a Fact. So start
+                      early and ask questions.)
+                  
+                  This is a large class. Unless each of you follows the above
+                  rules, the TAs' work becomes so hard. So I INSIST that you 
+                  FOLLOW the above rules. If you don't, we won't accept your 
+                  homework.
+
+                  If you have questions about these rules, you may post your 
+                  questions to the course website.
+
+
+Getting help:   - The Professor has office hours on Monday from 12:30-2:30, 
+                  and on Friday from 10:00-12:00, in room 9037.  He can also 
+                  be reached by email.
+                - The TAs are also available to answer your questions.
+                - Questions about the assignment can be posted to the 
+                  Discussion Forum.
+                - You may also discuss the ideas of the assignment with your
+                  classmates. Such discussions can be quite helpful to your 
+                  learning -- IF you ONLY talk about the general concepts of
+		  the steps of the assignment.
+		  - If, however, you tell other students the specific details
+		    of your implementation, then you are not helping each other
+		    to learn; you are just doing the work for them.
+                    In other words, you are cheating. You CANNOT show another
+		    student ANY part of the answer to the assignment.
+
+Cheating policy:  We encourage students to form study groups. But this does not
+                  mean sharing code. If students are found to be sharing work,
+		  they can receive a 0 for the entire course, or worse.
+                  It is cheating to let another student see your work, or to 
+                  let them look over your shoulder when your code is on the
+		  screen.
+		  A good way to know you cheated: if you have code that is in
+		  your solution just because another student told you to put
+		  it there, but you don't actually understand it.
+		  If you are still unsure, you can ask the TA for more
+		  explanation.
+                  We always look for evidence of cheating, so don't do it.
+                  (In any event, even if you do not get caught, those who 
+                  copy the homework will not learn the material, so they 
+                  will fail the exam.)
+
+Most Important    The programming assignments are a large part of the grade.
+Things to Know:	  This large point value means that, if you don't do them, you
+		  will fail.
+		  The large point value also explains why the policy against
+		  cheating is strictly enforced.
+		  
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 1. Assignment Summary :
+''''''''''''''''''''''''''''''
+In programming assignment 5, we implemented a very complex tcsh script to
+implement a line-crossing version of grep. Now that we know sed better, we
+can actually improve that script in four basic ways:
+  1) To make it shorter, because some things are better done in sed.
+  2) To use the -M flag to specify the maximum number of lines for a pattern.
+  3) To allow patterns to be on any lines (recall that, previously, matches
+     had to be within triplets.
+  4) To used the "{", "|", and "}" symbols to improve the appearance produced
+     by --color, then to remove those "{", "|", and "}" symbols.
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 2. Provided files :
+''''''''''''''''''''''''''
+If you are reading this file, then you must have untarred the assignment.
+Looking in the untarred directory, you will see:
+
+% ls
+leagues.txt  pa4b.csh  pa6.sed  pa7.template  README  test.in  test.out  XLgrep
+%
+
+The "leagues.txt" and "p4b.csh" files are self-explanatory; we've see them in
+earlier homeworks. The "pa6.sed" is my solution to homework 6. And the "XLgrep"
+is my solution to homework 5.
+
+Now let's take a closer look at test.in:
+sed -e '6a...' -e 6q < test.in 
+#!/usr/bin/tcsh
+echo ""> F.tmp1
+echo '102 203 304 405 506 607 708' | tr " " "\n" > F.tmp2
+set echo
+./XXLgrep "leagues beneath" leagues.txt --color -n
+./XXLgrep "leagues beneath" --color -n leagues.txt
+...
+
+Here we see that this file does two primary things: 1) turn on the "echo" flag,
+and 2) run XXLgrep with various arguments. And (because the "echo" flag is set)
+the various runs of XXLgrep will display before running. So you can use this
+script to test your programs. In fact, I used it to create the output file,
+test.out, that you see included in this tar file. I made it by typing:
+% ./test.in >& test.out
+
+Let's now take a look at that output file:
+% less -r test.out 
+
+Notice that I used a new  flag with less. This flag makes color show correctly.
+Since many of the test inputs used --color, it is helpful to look at the output
+in color. Looking through the test.out file, you should see that the outputs
+all make sense for the inputs provided. Also notice that the ones on the bottom
+of the script are intentionally wrong, to generate error messages.
+
+Here is how you can test your solution:
+% cat test.in | sed 's,XXLgrep,<YourStudentID>.XXLgrep,' > myTest.in
+% chmod u+x myTest.in
+% ./myTest.in >& myTest.out
+% diff myTest.out test.out
+%
+
+Notice that you had to rename the XXLgrep command. Also notice that the >& was
+used. Also notice that, in the example shown above, we have no differences. But
+you should test other inputs of your own as well.
+
+The final provided file is "pa7.template". This file guides you through the
+changes that you need to make. NOTE: there are a few slight changes from the
+version I posted earlier. Use the one posted here from this tar file. Let's
+take a closer look at this template file:
+
+% tac pa7.template|sed '/Further/,/^$/s/^/@/'|tac|sed -n '/%/{=;:L;N;s/%//g;tL;=;6s/^/\n/;p}' | sed '/^[1-9][0-9]*$/{s/^/Lines /;N;s/\n/-/;N;s/\n/:/}' | tac | sed '/^Lines/{N;s/\n.*/\n/}' | tac > Further.txt
+
+Here I have created a file called "Further.txt", which contains the comment
+sections preceding any line containing "Further". The script works because I
+know that all of the parts that you need to change have the word "Further"
+in those lines.
+
+Let's now look at parts of the Further.txt file we just created...
+
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+: Part 3. Line by Line guidance :
+'''''''''''''''''''''''''''''''''
+
+% cat Further.txt | sed 6q
+Lines 1-6:
+#!/usr/bin/tcsh
+if ( 0 ) then
+>This line is like pa5,but with a "@" placeholder. Further details to be posted
+/{&}/g;s/\([{}]\)\1/\1/g;s/\({[^}\n]*\)\n/\1|\n/g;:Y;s/\(|\n[^}|\n]*\)\n/\1|\n/
+>This line is unlike pa5. Further details to be posted.
+
+This section has two of the lines that you need to write. It is analogous to
+part of the XLgrep file. Let's see that part of that old homework:
+% head -5 XLgrep
+#!/usr/bin/tcsh
+if ( 0 ) then
+N;N;s/
+/{&}/g;s/\({[^}\n]*\)\n/\1|\n/g;s/\(|\n[^}\n]*\)\n/\1|\n/g
+endif
+
+See? Line 3 loaded three lines and then begins the "s" command. Line 4 skips
+the regular expression pattern of the "s" command, then does some other things
+to make it all work. Together with pa4 code to create the missing regular
+expression, they created the pa5.sed file. Let's see it:
+% ./XLgrep \! leagues.txt >/dev/null
+% cat pa5.sed
+N;N;s/!/{&}/g;s/\({[^}\n]*\)\n/\1|\n/g;s/\(|\n[^}\n]*\)\n/\1|\n/g
+
+Having done your earlier homeworks, you should know what the above program is
+doing. Now we want to expand the pa5.sed code. In particular, we don't want to
+be forced to do triplets. That is to say: 1) We don't want to always read two
+extra lines (the "N;N;" at the start of pa5.sed); instead we want to control 
+the number of lines, based on whether the user gave a -M flag; and 2)We want to
+find all matches, regardless of whether they cross a triplet boundary or not.
+
+As for line3 of pa7.template,this part is analogous to line3 of XLgrep (N;N;s/)
+Let "m" be the number of lines specified by the user in a -Mm flag. But, since
+we don't know what value the user will give "m", we can't just insert a fixed
+number of N's. Instead, we need to create a loop that keeps reading N's, one-
+by-one, until we have enough.
+
+Technical challenges to achieve this:
+  Q1. How to know if there are m lines in the pattern space (PS)?
+  A1. Well, that would mean that there are m-1 newlines in PS.
+
+      Q2. But how to search for m-1 newlines?
+      A2. Sed's "s" command has flags. One of them can do this.
+
+      	  Q3. OK. I see the s-command flag for that. But I'm still confused.
+	      That flag takes a number, but $m is a variable in cshell, not a
+	      number in sed.
+	  A3. Yes this is a little bit tricky. Recall, from the pa7.template
+	      file:
+% sed 3\!d < pa7.template
+>This line is like pa5,but with a "@" placeholder. Further details to be posted
+              The line above mentioned a "@" placeholder. The idea here is to
+	      replace the "@" by the value $m-1 when you create the pa7.tmpX
+	      file. Recall, from XLgrep, that the pa5.tmpX was used to make the
+	      pa5.sed file:
+% sed 95\!d < XLgrep
+cat pa5.tmpX | tr -d '\n' > pa5.sed
+              Remember? So now, instead of just putting line 3 into the tmpX
+	      file (like XL grep had done), instead we'll do something else.
+	      But recall that XLgrep had, in fact, as I have just said, simply
+	      put line 3 into the tmpX file, unchanged:
+% sed 79\!d < XLgrep
+head -3 XLgrep | tail -1 > pa5.tmpX
+              Do you see what I'm saying? Your answer will have a placeholding
+	      "@" symbol; when you put line 3 into the tmpX file, you will
+	      replace this symbol with m-1.
+
+	      Q4. OK. I got that. But I'm still unclear about the "s" command
+	          that I am putting the "@" placeholder into. Why am I using an
+		  "s" command in the first place? An "s" command is used for
+		  substitutions -- and I don't want to do any substitutions.
+	      A4. Right. So don't do a substitution -- put the matching pattern
+	      	  right backwhereyoufound it.
+
+		  Q5. But now I'm more confused. If I just put the match back,
+		      then the "s" command will have no effect. So why do it?
+		  A5. No. It will have an effect, or side-effect: it will set
+		      the flag that "t" can use.
+
+		      Q6. OK. I understand the "s" command. Bu what does line 3
+		          do?
+		      A6. In a loop, it keeps running "N" until the pattern
+		          space has enough. It also ends with ";s/", just like
+			  line 3 of XLgrep did:
+% sed 3\!d < XLgrep
+N;N;s/
+
+Now, before we move on, I will point out that "s" commands set the flag used by
+"t". If two "s" commands are executed, we won't know which one caused the flag
+to become true, unless we use a t to reset the flag. But this entire discussion
+seems unimportant. Line 3 only has one "s" command, so there is no ambiguity.
+But there, in fact is ambiguity. You just can't see it on line 3. Line 5 will,
+in fact, UNconditionally branch to the label at the start of line 3. Therefore,
+here in line 3,you should reset the flag, with a "t" command right after the
+label.
+
+
+Now, moving on, let's look at that part of the template again:
+% cat Further.txt | sed 6q
+Lines 1-6:
+#!/usr/bin/tcsh
+if ( 0 ) then
+>This line is like pa5,but with a "@" placeholder. Further details to be posted
+/{&}/g;s/\([{}]\)\1/\1/g;s/\({[^}\n]*\)\n/\1|\n/g;:Y;s/\(|\n[^}|\n]*\)\n/\1|\n/
+>This line is unlike pa5. Further details to be posted.
+
+And recall:
+% cat pa5.sed
+N;N;s/!/{&}/g;s/\({[^}\n]*\)\n/\1|\n/g;s/\(|\n[^}\n]*\)\n/\1|\n/g
+
+Notice that line 4 is similar to how it was in XLgrep. Inserting spaces helps
+to show the similarities:
+
+% sed 4\!d pa7.template > similar
+% sed -n '4{s/.\{32\}/&   /;s/.\{7\}/&                  /p}' XLgrep >> similar
+% cat similar
+/{&}/g;                  s/\({[^}\n]*\)\n/\1|\n/g;   s/\(|\n[^}\n]*\)\n/\1|\n/g
+/{&}/g;s/\([{}]\)\1/\1/g;s/\({[^}\n]*\)\n/\1|\n/g;:Y;s/\(|\n[^}|\n]*\)\n/\1|\n/
+%
+
+The differences have to do with the fact that we now cannot assume that there
+are three lines.
+Another pair of differences is that a label "Y" is now defined and the final
+substitution doesn't have a "g" flag.
+ - The reason for the "Y" label is so that line 5 can branch to it.
+   -  And the reason that we need to branch to it is so that we can loop over
+      the substitution.
+      - And the reason that we need to loop over it is because we no longer
+        have the "g" flag.
+	- And the reason that we couldn't just keep the "g" flag is that we now
+	  have matches of size > 3; and the adding of one "|" at the end of the
+          first matching line modifies the pattern space. But g doesn't update.
+	  I mean, consider:
+            % echo AAABB | sed 's/\([A-Z]\)\1\1/[\1]B/g'
+            [A]BBB
+            % echo AAABB | sed ':Y;s/\([A-Z]\)\1\1/[\1]B/;tY'
+            [A][B]B
+
+Ok. So let's look at line 5:
+% cat Further.txt | sed 6q
+Lines 1-6:
+#!/usr/bin/tcsh
+if ( 0 ) then
+>This line is like pa5,but with a "@" placeholder. Further details to be posted
+/{&}/g;s/\([{}]\)\1/\1/g;s/\({[^}\n]*\)\n/\1|\n/g;:Y;s/\(|\n[^}|\n]*\)\n/\1|\n/
+>This line is unlike pa5. Further details to be posted.
+
+Hmm. What does line 5 do? It does the following (this is just pseudocode; eg,
+sed doesn't have an "until" instruction):
+1. Conditionally branch to Y. (The reason for this branch has already been
+   described, above.
+2. do
+     3. Print the top line of the PS
+     4. Delete the top line of the PS. (Note: learn the "D" command and why it
+        CAN'T work here.)
+     5. If there are no more newlines in the PS, branch to the start of the
+        template's line # 3.
+   until there are no more "{" or "|" symbols in the PS.
+   (Notice that the "}" symbol was not in that list.)
+6 Branch to the start of the template's line # 3.
+
+The idea of the above is to print all of the matches, and to then take out
+those lines and load in new ones (at the beginning of the template's line #3.
+
+
+OK. Moving on, some more...
+% cat Further.txt | sed /Back\ when/,/Further/\!d
+# Back when we implemented pa5, what had made this challenging was that we did
+# not yet know all of the sed commands. In particular, we did not know how to
+# conditionally load the next input line. So, now that we know how to do this,
+# things becomes simpler. We won't need to create all of those tempfiles that
+# we had created in pa5. Instead, we'll deal with a lot of it right here, with
+# a short sed one-liner. It's logic is:
+#   If the pa7.tmp2 file created just above contains any line such that:
+#     1. That line is a flarg (recall that we know that there'll be no flasas)
+#     2. And that the flarg has nothing following it on the line
+#   Then we know that the next line contains the argument (unless the user
+#   had typed something wrong). We will then want to pull up the next line and
+#   combine it with the flarg line. In other words, by the time we finish the
+#   following command, every flarg will be on its own line, with its argument.
+cat pa7.tmp2| sed '__Further Details To Be Posted__' > pa7.tmp3
+
+
+The flags that take an argument are: A, B, C, D, M, d, e, f, and m. For each
+of these, we want to see if they are at the end of the line, and if so, then
+pull in the next line and make it part of this line (i.e, remove the newline).
+
+But: What if there is no next-line?
+But: What if the symbol is at the end, but it is not a flag? For example:
+     % XXLgrep -ef -CM 2
+     This will work in your script, but will crash in grep. Note, however, that
+     no flarg was separated from its argument. I.e, the "M" and "f" aren't
+     flargs. (By the way, "flarg" is a word that I made up, and it's defined in
+     the template file.)
+
+
+Moving on...
+% sed /80/,/Further/\!d Further.txt
+Lines 80-100:
+# The following uses grep's -c flag to check if the user had requested "--help"
+if ( __Further Details To Be Posted__ ) then
+
+Well, I don't have much to say about this one. It is pretty self-explanatory --
+use grep's -c flag. But, I will add two comments:
+ 1. It is not enough to get an answer from grep -- you need to make proper use
+    of that answer.
+ 2. Remember to put spaces all over the if-statement's conditional clause. (As
+    an early lecture noted, cshell is picky about spaces.)
+
+Moving on...
+% sed 85,86\!d pa7.template
+# The following uses grep's -c flag to check if the user requested "-D" or "-d"
+else if ( __Further Details To Be Posted__ ) then
+
+Again, not much to say -- it is self-explanatory and it is very similar to the
+previous line 81.
+
+
+Moving on...
+% sed '89,90p;95p' pa7.template
+# The following checks to see if there is a flarg without a argument. The only
+# way that this could happen is if the flarg had been the last input line.
+else if ( __Further Details To Be Posted__ ) then
+
+There are different ways to implement this. It is not hard. I leave it up to
+you.
+
+
+Moving on...
+% sed '96,99p' pa7.template
+# The following line prints an error message about the flag needing a value.
+# This error message must include the actual flarg name (eg "A","C","e",etc),
+# which can be extracted from the pa7.tmp3 file.
+echo __Further Details To Be Posted__
+
+There are different ways to implement this. It is not hard. I leave it up to
+you. The key insight is to know that the flarg must be at the bottom of the
+pa7.tmp3 file. (In the following illustrative example, only the last flarg, M,
+is, technically, missing its argument: "XXLgrep -eee -f -w -iof -f -M"
+The error message (and other error messages) must be on one line, however.
+
+
+Moving on...
+% sed /103/,/Further/\!d Further.txt
+Lines 103-115:
+# The following line identifies the final line that begins with "-M" (and we
+# know that there is one, because of Line #21 of this template file). I have
+# started the work for you, using "tac" to reverse the file, so that the final
+# "-M" line will become the first. I have also given you the "- 1" calculation.
+# (The reason why why do the -1 has to do with Line #21 of this template file;
+# it is essentially the fence-post problem: there are n-1 newline characters
+# between n lines). The part that I have not given you, the sed one-liner, must
+# use the "q" and "T" commands and must also remove the "-M" from the front of
+# the line of interest (so that what remains will be a number, assuming the
+# user typed a valid argument for the -M flarg).
+ MAXLINES = `tac pa7.tmp3 | sed -n '__Further Details To Be Posted__'` - 1
+
+I don't have anything to add, given that the above already gives a detailed
+description...
+
+
+And so, moving on...
+% sed /135/,/Further/\!d Further.txt
+Lines 135-144:
+# The following inserts the 3rd line of this file (eventually to be named
+# XXLgrep) into the pa7.tmpX file. But:
+#   1. It first replaces the "" symbol by the value of $MAXLINES (See above
+#      discussion on  at line 3 of this file.)
+#   2. It cannot use the "-n" sed flag
+#   3. It must use sed-logic with !. (Note:The "!" must be backquoted to work.)
+#   4. It must use "3" as a conditional line number predicate.
+sed __Further Details To Be Posted__ < XXLgrep > pa7.tmpX
+
+Again, I don't have anything to add, given that the above already gives a
+detailed description...
+
+
+And so, moving on...
+% sed /172/,/Further/\!d Further.txt
+Lines 172-176:
+# The following inserts the 4th and 5th lines of this file (eventually to be
+# named XXLgrep) into the pa7.tmpX file. But it must use sed-logic "!" command:
+sed __Further Details To Be Posted__ < XXLgrep >> pa7.tmpX
+
+This is fairly easy...
+
+The rest I did for you.

@@ -1,0 +1,10 @@
+#!/usr/bin/tcsh
+cp ~/pa3/items/$1 `pwd -P`/$1 ~/pa3 >& ~/X
+if ( -e ~/pa3/$1 ) then
+set x  = "expr `cat ~/pa3/$1 | wc -l` - 1"
+tail -n `$x` ~/pa3/$1
+rm -f ~/pa3/$1 >& ~/X
+else
+echo "I cannot see that here."
+endif
+

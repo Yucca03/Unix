@@ -1,0 +1,10 @@
+#!/usr/bin/tcsh
+if ( $1 == life || $1 == preserver ) then
+(mv  `pwd -P`/life ~/pa3/items/ && mv `pwd -P`/preserver ~/pa3/items/) >& ~/X  
+echo "Dropped."
+else if ( $1 == floppy || $1 == disk ) then
+(mv  `pwd -P`/floppy ~/pa3/items/ && mv `pwd -P`/disk ~/pa3/items/ ) >& ~/X 
+echo "Dropped."
+else if ( ! -e ~/pa3/items/* ) then
+echo "You are not holding that."
+endif

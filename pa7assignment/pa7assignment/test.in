@@ -1,0 +1,32 @@
+#!/usr/bin/tcsh
+echo ""> F.tmp1
+echo '102 203 304 405 506 607 708' | tr " " "\n" > F.tmp2
+set echo
+./XXLgrep "leagues beneath" leagues.txt --color -n
+./XXLgrep "leagues beneath" --color -n leagues.txt
+./XXLgrep "leagues beneath" --color -no leagues.txt
+./XXLgrep "leagues beneath" --color -o leagues.txt
+./XXLgrep "leagues beneath" -io leagues.txt
+./XXLgrep "leagues beneath" leagues.txt
+./XXLgrep "thousand .* beneath" leagues.txt --color -n
+./XXLgrep "leagues beneath" -no <leagues.txt
+cat F.tmp1 leagues.txt | ./XXLgrep "leagues beneath" -no
+cat F.tmp1 F.tmp1 leagues.txt | ./XXLgrep "leagues beneath" -no
+./XXLgrep '\([0-9]\) \1' --color < F.tmp2
+./XXLgrep -e "thousand .* beneath" -f leagues.txt --color -n
+./XXLgrep -e "thousand .* beneath" leagues.txt --color -n
+./XXLgrep -f leagues.txt --color -n -e "thousand .* beneath" 
+./XXLgrep leagues.txt --color -n -e "thousand .* beneath" 
+./XXLgrep -f leagues.txt --color -nM7 -e "thousand .* beneath" 
+./XXLgrep --color -n "leagues .* under\>" -B1 -M10 leagues.txt
+./XXLgrep --color -n "leagues .* under\>" -B1 -M6 leagues.txt
+echo "These should complain:"
+./XXLgrep -f leagues.txt --color -nM7 -f "thousand" 
+./XXLgrep -f leagues.txt --color -nM7 -f "thousand" -e "thousand" 
+./XXLgrep -f leagues.txt --color -nM7 "thousand" "thousand" 
+./XXLgrep leagues.txt --color -nM7 "thousand" "thousand" 
+./XXLgrep -e leagues.txt --color -nM7 -e "thousand" 
+./XXLgrep leagues.txt --color -nD7 -e "thousand" 
+./XXLgrep leagues.txt --color -x -e "thousand" 
+unset echo
+rm -f F.tmp?

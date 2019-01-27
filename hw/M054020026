@@ -1,0 +1,13 @@
+alias m='mkdir'
+alias makedirs='~/cd'
+mkdir hw1 
+cd hw1/
+ls
+pwd
+
+alias makedirs='cd ~/hw1;rm -rf;m hw;cd hw;m e;cd e;m n s;cd n;m d w;cd d;m d s;cd d;m sw;cd sw;m e sw w;cd e;m u;cd ..;cd ..;cd w;m d;cd d;md e;cd d;m n;cd n;m n;cd n;m u;cd u;m u;cd u;m ne;cd ne;m ne;cd ne;m ne;cd ..;cd ..;cd ..;cd ..;cd ..;cd ..;cd s;m s;cd s;m s;cd ..;cd ..;cd ..;cd e;m n w;cd ~/hw1'
+
+cd ~/hw1
+makedirs
+ls
+tar -cvf ~/dir.tar hw

@@ -1,0 +1,623 @@
+This is an overview of the assignment, so that you can read it and get an idea.
+After reading this, go on to read the READMEpa2 file.
+
+1 Assignment Overview
+
+1.1 The Actual Game
+
+In lecture 2, we learned about the emacs text editor. We also learned the
+bizarre fact that emacs has some built in games. One of these is a text-based
+adventure game. We will be recreating a portion of that game, as a way of
+reinforcing what we have learned about UNIX in lectures 1&2. I will now give
+some details about how to run the specific part of the game that we will be
+recreating. But these details are only for your reference -- you will not
+need to play the game in order to do the assignment, because I will describe
+what precisely you are supposed to do, here in this document.
+
+To begin, if you want to run the game, you open emacs. The game can be run
+under the menu choice: alt-` -> tools -> games -> Adventure.
+Nonetheless, the game's own help page says that it is not intended to be run
+in this way. Instead it is meant to be run by typing: "emacs -batch -l dunnet"
+
+Let's try that:
+
+% emacs -batch -l dunnet
+Dead end
+You are at a dead end of a dirt road.  The road goes to the east.
+In the distance you can see that it will eventually fork off.  The
+trees here are very tall royal palms, and they are spaced equidistant
+from each other.
+There is a shovel here.
+>
+
+
+Above, we see the start of the game. The prompt has become a ">", indicating
+that you are inside the game. We can type a command now. For example, we could
+type "get shovel" or we could type "e", since the text says the road goes east.
+
+But we won't type those commands, instead we'll restore a saved file, called
+"cave", that I have provided to you in the same posting as this README file:
+
+% emacs -batch -l dunnet
+Dead end
+You are at a dead end of a dirt road.  The road goes to the east.
+In the distance you can see that it will eventually fork off.  The
+trees here are very tall royal palms, and they are spaced equidistant
+from each other.
+There is a shovel here.
+>restore cave
+Done.
+Misty Room
+There is a gold bar here.
+>
+
+
+Above, we see that restoring the cave file has advanced us to a later part of
+the game (the third level: the level that is in a cave). The reason that we
+have advanced to this point is that this third level is what we will be
+attempting to recreate. Let's continue to play the game for a bit:
+
+>restore cave
+Done.
+Misty Room
+There is a gold bar here.
+>look
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+There is a gold bar here.
+>n
+You can't go that way.
+>e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+>w
+Misty Room
+There is a gold bar here.
+>e
+Cave E/W passage
+>look
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+>
+
+Above, we observe a few things:
+ - The first time that you enter a room, you get a full description. But,
+   after that, if you ever reenter the room, you only get the first line of
+   the description.
+ - The full description can still be redisplayed, if you type "look".
+ - There are also objects in some rooms. A gold bar, in this case. These
+   objects are also displayed when you enter the room or "look".
+ - The structure of these rooms is familiar to us from assignment #1. Recall
+   that assignment: The base directory had a subdirectory called "e". And
+   that subdirectory had two subdirectories of its own: "n" and "w". And so on.
+   Now notice the structure above: the first room (Misty) has a room to the
+   east (Cave) with a room to its east (N/S/W Junction). This junction has 3
+   exits, but one of them is backtracking. So that leaves 2 forward exits,
+   north and south. In other words, the structure of the directories that you
+   built in the last assignment was designed based on this game.
+
+
+Let's continue to play the game again:
+
+>restore cave
+Done.
+Misty Room
+There is a gold bar here.
+>i
+You currently have:
+A lamp
+A life preserver
+A diamond
+A slip of paper
+A floppy disk
+A shovel
+A brass key
+A bracelet
+>get all
+A gold bar: Taken.
+>look
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+>i
+You currently have:
+A lamp
+A life preserver
+A diamond
+A slip of paper
+A floppy disk
+A shovel
+A brass key
+A bracelet
+A gold bar
+>
+
+Above, we see that the game has an "i" command to show the "inventory" of
+items that the player currently holds. We also see that the player enters
+level 3 of this game already holding a variety of items that were picked up
+in the earlier levels (i.e., I picked them up when I played the first 2 levels,
+before I saved the "cave" file).
+We also see that you can "get" objects. And the gold bar, once picked up, will:
+1) disappear from the room, and 2) appear in your inventory.
+
+
+1.2 Our version of the game
+
+OK. That's enough of the actual game. For this assignment we are going to
+implement a simplified version. (If you think about it, it is pretty surprising
+that we can implement anything at all -- we don't know how to do make variables
+or loops yet.)
+
+Our main simplification is that we can only type single-word commands. In the
+above walkthrough of the actual game, we had typed "get all", but that is two
+words. So we will instead type "getall". Another simplification is that we will
+only implement a few commands:n,s,w,e,ne,nw,se,sw,u,d,i,getall,look,sleep,dig.
+
+Let's try it:
+% source B000000000.pa2
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>
+
+
+Notice from the above, that:
+- Your homework file is named with your student ID number, followed by ".pa2"
+- You use the source command to run your file (see slide #62 of Lecture 2's
+  Powerpoint).
+- Your file must have defined an alias for "game", because typing that command
+  has put us into the game. The room displays and the prompt changes to ">"
+- The full room description does, in fact display (in the earlier actual game,
+  the first room didn't display, because we restored a save file.)
+
+Alright, let's keep going:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A brass key
+A slip of paper
+A life preserver
+A shovel
+>getall
+You pick things up.
+>i
+You currently have:
+A bracelet
+A diamond
+A floppy disk
+A gold bar
+A brass key
+A slip of paper
+A life preserver
+A shovel
+>look
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+>getall
+There is nothing here to get.
+>
+
+
+Notice from the above, that:
+- The i command works. (The order of the display is unimportant.
+- The getall command properly picks up the gold: it goes into the inventory
+  and disappears from the room.
+- The getall command properly complains when there is nothing to pick up.
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+>e
+N/S/W Junction
+You are at the junction of two passages. One goes north/south, and
+the other goes west.
+>w
+Cave E/W passage
+>w
+Misty Room
+Here there is:
+A gold bar
+> getall
+You pick things up.
+>e
+Cave E/W passage
+>u
+You cannot go that way.
+>w
+Misty Room
+
+
+Notice from the above, that:
+- The full description of the room only displays the first time you enter the
+  room (just like the real game).
+- The short description also includes the statement that the gold bar is
+  present (just like the real game).
+- When you try to move in a wrong direction, you get an error message.
+- The error message does not use any contractions: it says cannot, not can't.
+  (This is important to note, because your program won't work right if you
+  try to use contractions in your strings.)
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+>cd ..
+>ls
+1  contents  e  gold
+>cat contents
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+>cd e/e
+>ls
+9  contents  n  s  w
+>
+
+
+Notice from the above, that:
+- We are not really playing a game. Instead we have just added aliases for the
+  game commands. To repeat: we've ADDED aliases. We haven't REMOVED anything.
+  So the regular UNIX command like cd still work. (I mean that cd "works" in
+  sense that it does change the directory. In so far as the game is concerned,
+  this is not how thing are supposed to "work". Well, that just means that you
+  are not supposed type UNIX commands.)
+- The parent directory of the "Cave E/W passage" is the room with the gold bar.
+  We see this because there is a file called "gold" in that directory.
+- That parent directory also contains a subdirectory called "e". This is the
+  directory of the "Cave E/W passage".
+- That parent directory also contains a file called "contents". When we use
+  cat to look inside that file, we see that it is the description of the room.
+- That parent directory also contains a file called "1". This file is the way
+  that we determine whether a room has been visited before:
+   - A room with a "1" has been visited before, so only the 1st line of the
+     contents file should be displayed.
+   - A room with a "9" has not been visited before, so 9 lines of the contents
+     file should be displayed. (None of the contents files of any rooms are
+     longer that 9 lines, so the "9" effectively means to display all of the
+     contents file. 
+- The room that is two rooms east of the start is a room that we haven't
+  visited yet, and it does indeed have a "9" instead of a "1".
+- The room that is two rooms east of the start also has three subdirectories.
+
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>e
+Cave E/W passage
+You are in an east/west passageway.  The walls here are made of
+multicolored rock and are quite beautiful.
+>e
+N/S/W Junction
+You are at the junction of two passages. One goes north/south, and
+the other goes west.
+>s
+South end of cave passage
+You are at the south end of a north/south passageway.  There is a hole
+in the floor here, into which you could probably fit.
+d>d
+Bathroom
+You are in a bathroom built for workers in the cave.  There is a
+urinal hanging on the wall, and some exposed pipes on the opposite
+wall where a sink used to be.  To the north is a bedroom.
+>n
+Bedroom
+You are in what appears to be a worker's bedroom.  There is a queen-
+sized bed in the middle of the room, and a painting hanging on the
+wall.  A door leads to another room to the south, and stairways
+lead up and down.
+>getall
+You cannot pick that up.
+>sleep
+As soon as you start to doze off you begin dreaming.  You see images of
+workers digging caves, slaving in the humid heat.  Then you see yourself
+as one of these workers.  While no one is looking, you leave the group
+and walk into a room.  The room is bare except for a horseshoe
+shaped piece of stone in the center.  You see yourself digging a hole in
+the ground, then putting some kind of treasure in it, and filling the hole
+with dirt again.  After this, you immediately wake up.
+>d
+NE end of NE/SW cave passage
+You are at the northeast end of a northeast/southwest passageway.
+Stairs lead up out of sight.
+>sleep
+You try to sleep standing up, but cannot manage it.
+>getall
+There is nothing here to get.
+>ls
+1  contents  sw  u
+>cd ..
+>ls
+1  bed  contents  d  painting  s  u
+>ls -A
+.sleep  1  bed  contents  d  painting  s  u
+>cat .sleep
+As soon as you start to doze off you begin dreaming.  You see images of
+workers digging caves, slaving in the humid heat.  Then you see yourself
+as one of these workers.  While no one is looking, you leave the group
+and walk into a room.  The room is bare except for a horseshoe
+shaped piece of stone in the center.  You see yourself digging a hole in
+the ground, then putting some kind of treasure in it, and filling the hole
+with dirt again.  After this, you immediately wake up.
+>
+
+
+Notice from the above, that:
+- The sleep command gives an error message unless you are where the bed is
+  (Figuring out to use the bed was one of the riddles in th game that will
+  let you find the gold bar.)
+- The getall command displays a different error message when in a room with
+  things (a bed, a painting) that you can't get, than the error message that
+  in a room without things (such as the room below the bedroom).
+- If we do an "ls" inside of the bedroom, we can see that the bed and the
+  painting are things in the room. (These things are represented by files, and
+  these files contain descriptions of the objects -- although the displaying of
+  these descriptions will not happen until the next homework.)
+- There is also a hidden file in the bedroom. This file, .sleep, contains the
+  description of the dream. (Since no other room will contain this file, we'll
+  know that we are in the room where we can sleep. And since it is a hidden
+  file, we won't think it is an object, in homework 3, when we xamine objects.)
+  
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>cd e/e/s/d/n/d/sw/e/u
+>ls
+9  boulder  contents  horseshoe
+>cat contents
+Horseshoe boulder room
+You are in a room which is bare, except for a horseshoe shaped boulder
+in the center.  Stairs lead down from here.
+>ls
+9  boulder  contents  horseshoe
+>diff boulder horseshoe
+>
+
+
+Notice from the above, that:
+- We can just jump directly to a room. (Not because it makes sense, from the
+  point of view of the game, but because it makes it easier for us to get
+  around, while talking about the game, in this README file.)
+- The room that I have jumped to is the one with the horseshoe shaped boulder
+  from the dream. This must mean that there is a treasure here.
+- When I type "ls" I see the boulder, but I don't see the treasure. That is
+  because it is not visible until we dig it up (as indicated in the dream).
+- In fact, I see a "boulder" and a "horseshoe". This will become relevant in
+  the next homework. But the idea is that the user might reasonably ask to
+  look at either one. So they are the same (as indicated by the fact that
+  "diff" produced no output).
+- The room has a "9", even though we have entered it -- but only because we
+  used cd to get to the room.
+
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>cd e/e/s/d/n/d/sw/e/u
+>ls
+9  boulder  contents  horseshoe
+getall
+You cannot pick that up.
+>ls -A
+.platinum  9  boulder  contents  horseshoe
+>dig
+I think you found something.
+>ls -A
+9  boulder  contents  horseshoe  platinum
+>getall
+You pick things up.
+>getall
+You cannot pick that up.
+>ls
+9  boulder  contents  horseshoe
+> dig
+Your digging reveals nothing.
+>
+
+
+Notice from the above, that:
+- The treasure, a platinum bar, is actually in the room as a hidden file.
+- Digging causes the treasure to no-longer be hidden.
+- When I getall, I get the platinum, but not the boulder.
+- Digging only works once, and only in this one room.
+
+
+
+
+Alright, let's keep going some more:
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> pwd
+/home/Me/pa2/start
+>ls
+1  contents  e  gold
+> cd e/e/s/d/n
+> pwd
+/home/Me/pa2/start/e/e/n/d
+>ls
+9  bed  contents  d  painting  s  u
+>cd ../../../../..
+> pwd
+/home/Me/pa2/start
+> cd e/e/n/d/
+> pwd
+/home/Me/pa2/start/e/e/s/d/n
+>ls
+9  bed  contents  d  painting  s  u
+> pwd -P
+/home/Me/pa2/start/e/e/n/d
+>
+
+
+Notice from the above, that:
+- The pwd result is specific to my computer. Your output will not say "Me", for
+  instance.
+- There are two separate paths to get to the bedroom. The bed file can be
+  accessed by either
+  >cat /home/Me/pa2/start/e/e/n/d/bed       or
+  >cat /home/Me/pa2/start/e/e/s/d/n/bed
+- The -P flag causes ...../e/e/s/d/n to become  ...../e/e/n/d
+  How to explain this? Well, there are a few places where paths merge in the
+  game. Since we have used directories for the rooms, these merge points will
+  need to be handled specially. Let's see how we do it:
+  
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> cd e/e/s
+>look
+South end of cave passage
+You are at the south end of a north/south passageway.  There is a hole
+in the floor here, into which you could probably fit.
+> ls -l
+total 2
+-rw-r--r-- 1 Me Me   0 Mar  3 00:00 1
+-rw-r--r-- 1 Me Me 151 Feb 28 19:52 contents
+lrwxrwxrwx 1 Me Me   8 Mar  3 23:15 d -> ../n/d/s
+>cd d
+>pwd
+/home/Me/pa2/start/e/e/s/d
+>pwd -P
+/home/Me/pa2/start/e/e/n/d/s
+>
+
+
+Notice from the above, that:
+- The reason that we get a merge point is that there is a hole above the
+  bathroom. You can drop down it, but you can't go back up.
+- The merging is accomplished by creating a symbolic link.
+- When following the symbolic link, the output of pwd indicates the symbolic
+  path.
+- If you want to see the physical path, you can use pwd's -P flag.
+
+But there is a point about cd .. to discuss:
+
+
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+> cd e/e/s
+> cd d
+>pwd
+/home/Me/pa2/start/e/e/s/d
+cd ..
+>pwd
+/home/Me/pa2/start/e/e/s
+>cd d
+>pwd
+/home/Me/pa2/start/e/e/s/d
+> cd `pwd -P`
+/home/Me/pa2/start/e/e/n/d/s
+>cd ..
+>pwd
+/home/Me/pa2/start/e/e/n/d
+>
+
+Notice from the above, that:
+- cd .. follows the link back to the symbolic parent.
+- This is not what we want (after all, we got into the bathroom by jumping
+  through a hole that we are not supposed to be able to climb back up.
+- cd `pwd -P` changes the path to not have links. After executing this, the
+  pwd without any flags gives the physical address -- and cd .. takes us to
+  the bedroom rather than back through the hole (i.e., it works).
+- The ` symbol is one that we have not learned yet. (You'll learn it in lecture
+  3. But we can understand it easily enough: the output of pwd -P is converted
+  into a command-line argument to the cd command (rather than printing to the
+  screen).
+  
+
+
+We're almost done with describing the running of the game. The only things
+left to say are that there are some other objects in other rooms, that there
+are a few more symbolic links, and that there is a directory for the items we
+hold. Let's see that directory:
+
+% game
+Misty Room
+You are in a misty, humid room carved into a mountain.
+To the north is the remains of a rockslide.  To the east, a small
+passage leads away into the darkness.
+Here there is:
+A gold bar
+>ls ../items
+bracelet  contents  diamond  disk  floppy  key  life  paper  preserver  shovel
+>
+
+Among these items, the life preserver and the floppy disk are the most notable.
+This is because they each have two names (analogous to how the horsesehoe
+shaped boulder had two names). This double naming has no effect on this
+homework, but will have an effect on homework 3.
+
+

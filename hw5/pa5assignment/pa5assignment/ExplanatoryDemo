@@ -1,0 +1,232 @@
+#!/usr/bin/tcsh
+# Because this example uses color, this file needs to be executed.
+# Type:   ./ExplanatoryDemo
+#
+set r = "[1;31m"
+set b = "[1;34m"
+set y = "[0;33m"
+set n = "[0m"
+set c = "[1;36m"
+set p = "[0;35m"
+set g = "[0;32m"
+set G = "[1;30m"
+set hitC = $r"<hit enter>"$y\:$n
+set hitP = " ... $r<hit enter>$y ..."
+set hitR = $r"<hit enter to run the following command>"$y\:$n
+clear
+echo $y"Let us look in our current directory $hitR\
+"
+echo -n "% ls"
+set x = $<
+ls
+echo "\
+$b\
+Assuming that you are in the untarred directory I gave you, then the above ls\
+should have produced:$n\
+      % ls\
+      ExplanatoryDemo  leagues.txt  pa4.sed  pa4b.sh  pa5.template  README\
+$y\
+(If this isn't what you see, then hit "$r"<Ctrl-C>$y and go into that directory.\
+ Otherwise, hit "$r"<enter>$y.)\
+$n"
+
+set x = $<
+clear
+echo $p'You can only have gotten here by NOT hitting Ctr-C. And that means that your\
+ls output had been as expected. So the "leagues.txt" file is in this directory.\
+'
+echo $y"Let us look at it $hitR"
+echo -n $n'\
+% grep -A20 '\'Thousand\$\'' leagues.txt | grep .'
+set x = $<
+grep -A20 'Thousand$' leagues.txt | grep .
+echo $b'\
+\
+From the above output, we see that this text file is an ebook for the classic\
+novel "Twenty Thousand Leagues Under the Seas" by Jules Verne.\
+\
+'$y'Let us now look around in this ebook'$hitP
+set x = $<
+clear
+echo $y"Let's look for a two-word phrase. $hitR\
+"
+echo -n '% grep --color "leagues under" leagues.txt'
+set x = $<
+grep --color "leagues under" leagues.txt
+echo $y'\
+Here we see that there is only one place where the file contains the phrase\
+"leagues under". But, you say, "The title is '"'Twenty Thousand Leagues Under\
+the Seas,'"' so how can there only be one place?"\
+Well, the answer is: "because this grep search was case-sensitive."\
+\
+'$hitP
+set x = $<
+clear
+echo $b'The preceding search for the two-word phrase "leagues under" leads us towards\
+a discussion of the goals of this assignment.'
+echo $y'\
+To begin that discussion, let us search again, but for a slightly different\
+two-word phrase, "leagues beneath". '$hitR
+echo -n '\
+% grep --color "leagues beneath" leagues.txt'
+set x = $<
+grep --color "leagues beneath" leagues.txt
+echo $b"\
+Here we see that two word phrase never occurs in the file. $hitP"
+set x = $<
+echo $y"\
+...Or does it? There might possibly be a sentence that crosses a line boundary,\
+and which does have this two-word phrase, split on 2 separate lines. Here we\
+have a problem, because grep can't find that kind of a pattern. How then can\
+we check for such a case? $hitP"
+set x = $<
+clear
+echo  'Well, we can begin by looking for the necessary first condition, which is that\
+there would be a line ending with the word "leagues". '$G'(The second condition is\
+that the next line must begin with "beneath", but we'"'ll get to that in a moment)$y\
+So let's look for that first condition.$hitR"
+echo -n "\
+% grep --color 'leagues"\$"' leagues.txt"
+set x = $<
+grep -n --color 'leagues$' leagues.txt
+echo $b'\
+\
+From the above, we see that two lines ('$g"4703$b & $g""17200$b) meet the first condition.$y\
+$hitP"
+set x = $<
+echo $y'So, does either line 4704 or 17201 begin with "beneath"? Let'"'s take a look\
+and see. $hitR"
+echo -n '\
+% head -4704 leagues.txt | tail -1; head -17201 leagues.txt | tail -1'
+set x = $<
+head -4704 leagues.txt | tail -1; head -17201 leagues.txt | tail -1
+
+echo "\
+$p"'Well look at that'\!' Line 4704 begins with "beneath". So the two-word phrase,\
+"leagues beneath", does occur in the file after all.'$hitP
+set x = $<
+clear
+echo $y"It is for the purpose of finding things like this that we want to implement\
+this assignment. To illustrate how it works, let's pretend that you've finished\
+your homework. Once you've finished, you'll have completed the <your_ID>.pa5\
+file. Let's pretend that you have it. $hitC"
+echo -n '\
+% ./B000000000.pa5 "leagues beneath" leagues.txt --color -n'
+set x = $<
+echo $g"4703$c":"$n""have a mind to visit the ocean depths two or three vertical $r{leagues|$n\
+$g"4704$c\:"$r""beneath}$n the surface, I use maneuvers that are more time-consuming\
+$y"
+echo "So we found the match.\
+"
+echo "And we supported the same flags as grep.\
+"
+echo "But we also have inserted some new symbols: {, |, and }."
+echo "  These extra symbols are temporary; we will get rid of them in the next\
+  programming assignment (after we learn more about sed). $hitP"
+set x = $<
+clear
+cat ExplanatoryDemo | head -152 | tail -23
+if ( 0 ) then
+[0;33mWe can use a variety of grep flags. For example:
+[0m
+% ./B000000000.pa5 "leagues beneath" --color -n leagues.txt
+[0;32m4703[1;36m:[0mhave a mind to visit the ocean depths two or three vertical [0;31m{leagues|[0m
+[0;32m4704[1;36m:[0;31mbeneath}[0m the surface, I use maneuvers that are more time-consuming
+
+% ./B000000000.pa5 "leagues beneath" --color -no leagues.txt
+[0;32m4703[1;36m:[0;31m{leagues|
+[0;32m4704[1;36m:[0;31mbeneath}[0m
+
+% ./B000000000.pa5 "leagues beneath" --color -o leagues.txt
+[0;31m{leagues|
+beneath}[0m
+
+% ./B000000000.pa5 "leagues beneath" -io leagues.txt
+{leagues|
+beneath}
+
+% ./B000000000.pa5 "leagues beneath" leagues.txt
+have a mind to visit the ocean depths two or three vertical {leagues|
+beneath} the surface, I use maneuvers that are more time-consuming
+
+                          [0;31m<hit enter to continue...>[0m
+endif
+set x = $<
+clear
+cat ExplanatoryDemo | head -170 | tail -13
+if ( 0 ) then
+[0;33mLet's try a more complex pattern:
+[0m
+
+% ./B000000000.pa5 "thousand .* beneath" leagues.txt --color -n
+[0;32m9130[0;36m:[1;31mOur lights produced a {thousand delightful effects while playing over[0m
+[0;32m9131[0;36m:[1;31mthese brightly colored boughs.  I fancied I saw these cylindrical,|[0m
+[0;32m9132[0;36m:[1;31mmembrane-filled tubes trembling beneath}[0m the water's undulations.
+%
+
+[0;33mNotice that this pattern has crossed three lines. This is the limit of the
+number of lines for matches (in this assignment).
+
+                          [0;31m<hit enter to continue...>[0m
+endif
+set x = $<
+clear
+cat ExplanatoryDemo | head -187 | tail -12
+if ( 0 ) then
+[0;33mYou might recall that, in class, I said that we didn't get quite as far into 
+the material as I had planned. As a result, I deleted some parts of what was 
+originally meant to be programming assignment. (Those parts will now be in the
+next assignment.) As a result of this, the current assignment is flawed. It 
+cannot find matches that are not within triplets of lines. 
+
+The triplets are: (1-3), (4-6), (7-9), (10-12), etc. This means that there are
+adjacent pairs that are not within triplets: (3-4), (6-7), (9-10), etc. 
+
+In each of these pairs, notice that the First Number is a multiple of 3. 
+
+Do you need an example? OK...  [0;31m<hit enter to continue...>[0m
+'
+endif
+set x = $<
+clear
+cat ExplanatoryDemo | head -213 | tail -20
+if ( 0 ) then
+[0;33mWe can see this by inserting extra lines to the top of the leagues.txt file:
+
+[0m
+% echo > F
+
+% cat leagues.txt | ./t.csh "leagues beneath" -no
+4703:{leagues|
+4704:beneath}
+
+% cat F leagues.txt | ./t.csh "leagues beneath" -no
+
+% cat F F leagues.txt | ./t.csh "leagues beneath" -no
+4705:{leagues|
+4706:beneath}
+
+
+[0;33mSee that? When "leagues" is on line 4704 and "beneath" is on line 4705, then
+the line does not show up. This is because 4704 is a multiple of 3.
+
+                          [0;31m<hit enter to continue...>[0m
+endif
+set x = $<
+clear
+cat ExplanatoryDemo | head -230 | tail -12
+if ( 0 ) then
+[0;33mHere is another example, showing the same effect:
+
+[0m
+% echo '12 23 34 45 56 67 78' | tr " " "\n" | ./t.csh '\([0-9]\) \1'
+1{2|
+2}{3|
+3}4
+4{5|
+5}{6|
+6}7
+
+                          [0;31m<hit enter to [0;33mend the demo![0;31m...>[0m
+endif
+set x = $<

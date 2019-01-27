@@ -1,0 +1,18 @@
+#!/usr/bin/tcsh
+if (!(-e axe)) then
+echo "You have nothing with which to break things."
+else if ($# == 0) then
+echo "You must supply an object."
+else if ( !(-e $1) || !(-f $1)) then
+echo "I don't see that here."
+else if ( $file != cable ) then
+echo "Your axe shatters into a million pieces.";
+rm -rf  ~/item/axe
+else 
+echo -e "As you break the ethernet cable, everything starts to blur.  You collapse\n\
+for a moment, then straighten yourself up.\n\
+\n\
+Connection closed.\n\
+\n\
+Congratulations. You finished the level."
+endif

@@ -1,0 +1,32 @@
+rm -f pa2Assignment/x/;ln -s /dev/null ~/x;
+
+alias nogo='echo "You cannot go that way."'
+
+alias l='head -9 contents && mv 9 2> /dev/null;head -1 contents > 1;echo Here there is: && ls ??[eaolypeow]* 2> junk; ' 
+
+alias look='find -.name 9; l'
+
+
+alias n='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd n && cd `pwd -P` && l || nogo'
+
+
+alias e='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd e && cd `pwd -P` && l || nogo'
+alias s='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd s && cd `pwd -P` && l || nogo'
+alias d='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd d && cd `pwd -P` && l || nogo'
+alias sw='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd sw && cd `pwd -P` && l || nogo'
+alias w='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd w && cd `pwd -P` && l || nogo'
+alias ne='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd ne && cd `pwd -P` && l || nogo'
+alias nw='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd nw && cd `pwd -P` && l || nogo'
+alias se='basename `pwd -P` > ~/D; fgrep -w s ~/D ; cd .. ; cd se && cd `pwd -P` && l || nogo'
+
+alias u='ln -s pa2/start/e/e/n/d pa2/start/e/e/n/d/d|| ln -s pa2/start/e/e/n/d pa2/start/e/e/n/d/d'
+
+alias i ='echo "You currently have:";ls pa2/items/??[eaolypeow]*'
+
+alias getall = 'mv ??[eaolypeow]* ../pa2/items/ && echo "You can picked up." || (echo "You cannot be picked up." && echo "There are no things objects present.")'
+
+alias sleep = 'cat .sleep || echo "you cannot sleep"'
+
+mv .platinum .dig && echo "found something" || echo "found nothing."
+
+alias game='rm -r pa2;tar -xvf room.tar;cd pa2/start;clear;look;PS1=">"'

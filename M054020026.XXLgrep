@@ -1,0 +1,245 @@
+#!/usr/bin/tcsh
+if ( 0 ) then
+s/-M/&@/;:X;N;tX;s/
+/{&}/g;s/\([{}]\)\1/\1/g;s/\({[^}\n]*\)\n/\1|\n/g;:Y;s/\(|\n[^}|\n]*\)\n/\1|\n/
+/^\(.*\)\n\1$/p; /^\(.*\)\n\1$/d;bX;tY;
+endif
+
+# We need the colors red, cyan, and green, because grep -n --color" uses them.
+# I am giving you the following, because knowing how to print color is not part
+# of this course. Just know that displaying $r changes the color to red, $n to
+# white (normal), $g to green.  $colon prints a cyan ":" then changes to white.
+set r = "[1;31m"
+set n = "[0m"
+set g = "[0;32m"
+set colon = "[1;36m:$n"
+
+# Note: The default number of lines across which a match can occur is 3.
+# Note: If multiple -M flags are provided, the LAST ONE is the one that's used.
+# Therefore, we can insert a -M3 flag (the default), knowing that any actually
+# requested -M flag will displace it. And so, that is why we do the following:
+echo "-M3" > pa7.tmp1
+
+# I am giving you the following, because it is not very different from pa5:
+foreach i (`seq $#`)
+  ./pa4b.csh $argv[$i]:q >& pa7.tmp2
+  cat pa7.tmp2 >> pa7.tmp1 
+end
+
+
+# Let us define terms: A "flarg" is a flag that takes an argument. For example,
+# "A" is a flarg, because it takes an argument: if you typed "grep -A3", then
+# "A"'s argument is "3", indicating that three lines will print after a match.
+# Similarly, define A "flasa" as a flag that stands alone (i.e., a flasa is not
+# a flarg).
+# One of the big challenges of programming assignment #5 (pa5) was that UNIX
+# allows flargs to be flexibly specified. A flarg may or may not be immediately
+# preceded by flasa(s): In the example "-nA3", the flarg "A" is preceded by a
+# flasa, "n". But in the case of "-n -A3", the flarg is not. The flexibility
+# of specifying flargs also extends to the defining of their arguments: these
+# may or may not be immediately following the flarg. "-nA3" and "-A3" do have
+# the flarg's argument following the flarg. But "-A 3" does not--the argument
+# here is separated by a space.
+# You should understand about how UNIX allows for flexible defining of flargs;
+# not just because this assignment uses it, but also because it is part of
+# understanding how UNIX arguments work (so it could be put on the exam).
+# This concept is similar to the reason why we had to handle unusual regular
+# expressions in pa4: the reason we learned it was not just to make pa4 messy;
+# we learned it because it is important, as a student learning UNIX, to learn
+# the nuances of how UNIX allows regular expressions to be specified (i.e., it
+# is testable.)
+
+# The following line handles the specific case where a flarg is preceded by
+# flasa(s). It inserts a newline between them, so that we'll know, hereafter,
+# that every flargs is at the beginning of a line. It is almost the same as
+# for pa5, so I am just giving you the code:
+cat pa7.tmp1| sed 's/^\(-[^-A-DMdefm]\{1,\}\)\([-A-DMdefm]\)/\1\n-\2/'>pa7.tmp2
+
+
+# The following line handles the specific case where a flarg is not immediately
+# followed by its argument (i.e, they were separated by a space, like: -A 2).
+# If they are, in fact, separated by a space on command line, then they will be
+# on separate lines of the pa7.tmp1 file (because, as you can see above, each
+# $argv value was individually appended to that file).
+#
+# Back when we implemented pa5, what had made this challenging was that we did
+# not yet know all of the sed commands. In particular, we did not know how to
+# conditionally load the next input line. So, now that we know how to do this,
+# things becomes simpler. We won't need to create all of those tempfiles that
+# we had created in pa5. Instead, we'll deal with a lot of it right here, with
+# a short sed one-liner. It's logic is:
+#   If the pa7.tmp2 file created just above contains any line such that:
+#     1. That line is a flarg (recall that we know that there'll be no flasas)
+#     2. And that the flarg has nothing following it on the line
+#   Then we know that the next line contains the argument (unless the user
+#   had typed something wrong). We will then want to pull up the next line and
+#   combine it with the flarg line. In other words, by the time we finish the
+#   following command, every flarg will be on its own line, with its argument.
+cat pa7.tmp2| sed '$q:N;s/^-[ABCDMdefm]/&\n/' > pa7.tmp3
+
+
+# The following uses grep's -c flag to check if the user had requested "--help"
+if ( `grep -c "^--help" pa7.tmp3` == 1 ) then
+  tail -18 XXLgrep
+  exit
+# The following uses grep's -c flag to check if the user requested "-D" or "-d"
+else if ( `grep -c "^-D" pa7.tmp3` >= 1 | `grep -c "^-d" pa7.tmp3` == 1 ) then
+  sed -n 's/^\(-[Dd]\)/Error: this grep flag(s) is not supported by XLgrep: \1./p' < pa7.tmp3
+  exit 2
+# The following checks to see if there is a flarg without a argument. The only
+# way that this could happen is if the flarg had been the last input line. (I
+# mean: you could certainly miss a flargs argument earlier than the end of the
+# with argument list, eg: "grep -A -eX", but that would create a flarg line a
+# real ( but admittedly wrong) argument, eg: "-A-eX". So the only way to have a
+# flarg without an argument is if it was the last argument, eg: "grep -eX -A")
+else if ( `grep -c "^-.*" pa7.tmp3` == 1 ) then
+  # The following line prints an error message about the flag needing a value.
+  # This error message must include the actual flarg name (eg "A","C","e",etc),
+  # which can be extracted from the pa7.tmp3 file.
+  echo error `tail -1 pa7.tmp3`
+  exit 2
+endif
+
+
+# The following line identifies the final line that begins with "-M" (and we
+# know that there is one, because of Line #21 of this template file). I have
+# started the work for you, using "tac" to reverse the file, so that the final
+# "-M" line will become the first. I have also given you the "- 1" calculation.
+# (The reason why why do the -1 has to do with Line #21 of this template file;
+# it is essentially the fence-post problem: there are n-1 newline characters
+# between n lines). The part that I have not given you, the sed one-liner, must
+# use the "q" and "T" commands and must also remove the "-M" from the front of
+# the line of interest (so that what remains will be a number, assuming the
+# user typed a valid argument for the -M flarg).
+@ MAXLINES = `tac pa7.tmp3 | sed -n ':x;s/-M//;q;Tx'` - 1
+
+
+# The following lines, which I am giving you, creates a single string out of
+# all of the flasa(s), and then checks for errors in these flasas. (I give it
+# to you because it is not very different from pa5.):
+set F = `grep "^-[^-A-DMdefm]" pa7.tmp3 | tr -d "\n\-"`
+if ( $F =~ "*[JKNOQSWXYgjkpt]*" ) then
+  echo "Error: flag(s) $F unrecognized by grep:"\
+       "`echo $F|sed 's/[^JKNOQSWXYgjkpt]//g;s/./, -&/g'`"
+  exit 2
+else if ( $F =~ "*[DEFHILPRTUZbdlqrz]*") then
+  echo "Error: this grep flag(s) is not supported by XLgrep:"\
+       "`echo $F|sed 's/[^DEFHILPRTUZbdlqrz]//g;s/./, -&/g'`"
+  exit 2
+# The following part is new, but I give it to you anyway. It sets a boolean if
+# the user has requested the -n flag.
+else if ( $F =~ "*n*") then
+  set LineNums
+endif
+
+
+# The following inserts the 3rd line of this file (eventually to be named
+# XXLgrep) into the pa7.tmpX file. But:
+#   1. It first replaces the "@" symbol by the value of $MAXLINES (See above
+#      discussion on @ at line 3 of this file.)
+#   2. It cannot use the "-n" sed flag
+#   3. It must use sed-logic with !. (Note:The "!" must be backquoted to work.)
+#   4. It must use "3" as a conditional line number predicate.
+sed 's/@/$MAXLINES/; 3!d' < XXLgrep > pa7.tmpX
+
+
+# This switch statement counts how many -e flargs were typed by the user:
+switch ( `grep -c "^-e" pa7.tmp3` ) 
+  case 0:
+    # If 0 -e's were typed, then XXLgrep will use the first non-flag parameter:
+    if ( `sed '/^-/d;q' < pa7.tmp3` == "" ) then
+      echo "Error: You must supply a regular expression."
+      exit 2
+    endif
+    # The following adds a "-e" in front of the first nonflag parameter -- thus
+    # making it a flarg. Notice how I use a loop to ensure that only the first
+    # nonflag gets the "-e" added to it. Notice also that the sed command can't
+    # do this: "cat somefile | sed ... | somefile". Instead, we need to use an
+    # output file with a different name.
+    cat pa7.tmp3 | sed '/^[^-]/{s/^/-e/;:L;n;bL}' > pa7.tmp4
+    mv pa7.tmp4 pa7.tmp3
+    # Notice that case 0 has no breaksw; it spills into case 1.
+  case 1:
+    # The following puts the regular expression into pa7.tmpX. It's analogous
+    # to what we did in pa5, but it makes smart use of sed's T and p commands.
+    cat pa7.tmp3 | sed -n 's/^-e//;T;s/\\/%/g;p' | sed -f pa6.sed >> pa7.tmpX
+    breaksw
+  default:
+    echo "Error: XLgrep does not allow multiple regular expressions."
+    exit 2
+endsw
+
+
+# The following inserts the 4th and 5th lines of this file (eventually to be
+# named XXLgrep) into the pa7.tmpX file. But it must use sed-logic "!" command:
+sed '4,5!d' < XXLgrep >> pa7.tmpX
+
+# The following line, which I am giving you, creates the pa7.sed program:
+cat pa7.tmpX | tr -d '\n' > pa7.sed
+
+# The following line, which I am giving you, locates the filename, either
+# because it is a nonflag parameter, or because the -f flag was used:
+set filename = `sed -n '/^[^-]/p;s/^-f//p' pa7.tmp3`
+
+# Now, the above line has a feature: If there is more than one file name (i.e.,
+# if the user made a mistake),then the $filename variable will be an array.
+# The following lines, which I am giving you, handle the two special cases:
+# 1) no filename -- use stdin, or 2) multiple filenames -- print an error.
+if ( $#filename == 0 ) then
+  cat > tempfile.in
+  set filename = tempfile.in
+else if ( $#filename > 1 ) then
+  echo "Error: XLgrep does not allow multiple filenames."
+  exit 2
+endif
+
+
+# The following inserts an extra $MAXLINES number of empty lines at the end of
+# of the file, and then runs pa7.sed, and then throws away those extra lines.
+# Although I am giving you the code, you should understand it for the exam.
+seq $MAXLINES|tr -dc "\n" > pa7.tmp6
+cat $filename pa7.tmp6|sed -nf pa7.sed | sed `cat $filename | wc -l`q>pa7.tmp4
+
+
+# The following creates an array of all flags other than those that we've
+# already dealt with (-e, -f -m). Although I am giving you the code, you should
+# understand it for the exam.
+set F = `sed '/^[^-]/d;/^-[efM]/d;G;s/\n/ /;h' < pa7.tmp3`
+
+# the following line is similar to pa5:
+grep $F -e "{[^}]*}"  -e "{[^}]*|" -e "^[^{}]*[}|]" < pa7.tmp4 > pa7.tmp5
+
+
+# The rest of the code is to handle color and to remove the {, }, and | symbols
+# I give you all of this code, and you don't have to understand it for the exam
+if ( `grep -c "^--color" pa7.tmp3` == 0 ) then
+  set r = $n:q; set colon = \:; set g = $n:q
+endif
+
+if ( $?LineNums ) then
+  cat pa7.tmp5 | sed ':A;/|$/{n;s,:,:'"$r,;bA}" | \
+                 sed "s/{/$r/g;s/}/$n/g;s/^\([0-9]*\):/$g\1$colon/g;s,|"\$,,
+else
+  cat pa7.tmp5 | sed "s/{/$r/g;s/}/$n/g;s,|"\$,,
+endif
+
+exit
+
+Usage: XLgrep [OPTION]... [FILE]...
+A version of grep that allows for regular expressions that span multiple lines
+of the input file. A space in the regular expression can match to any number
+of spaces, tabs, or newline characters, with two exceptions: 1) spaces that
+are inside of brackets or are backslash quoted, and 2) matches that span more
+than 3 lines of the input file.
+
+Differences from standard grep:
+
+  Unsupported grep flags : b,c,d,e,k,l,q,r,s,x,z,D,E,F,H,I,L,P,S,T,U,V, and Z 
+
+  Only one regular expression and one file name are allowed. Their positions
+  identify them: the 1st nonflag argument is the regular expression and the
+  2nd is the filename. If a filename is not given, input will come from stdin.
+  The -f/-e flags can directly specify the filename/expression, respectively.
+  
+  An additional flag, M, is introduced to allow the user to set the size of
+  MAX_LINES. The default value is 3.

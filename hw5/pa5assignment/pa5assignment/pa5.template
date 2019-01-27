@@ -1,0 +1,114 @@
+#!/usr/bin/tcsh
+if ( 0 ) then
+__1__;__1__;s/
+/{&}/g;s__2__;s__3__
+endif
+
+rm -f pa5.tmp?
+echo -n > pa5.tmpP
+echo -n > pa5.tmpC
+echo -n > pa5.tmpF
+echo -n > pa5.tmpE
+echo -n > pa5.tmpL
+
+foreach i (__4__)
+  ./pa4b.sh $argv[$i]:q >& pa5.tmp2
+  cat pa5.tmp2 >> pa5.tmp1 
+end
+cat pa5.tmp1 | sed 's__5__' |\
+    grep __6__ | sed 's__7__' | grep __8__ > pa5.tmp3
+
+grep -q "^-%-help" pa5.tmp3
+if ( __9__ ) then
+  tail -18 XLgrep
+  exit
+endif
+
+set ArgTypes = ( `cat pa5.tmp3 | sed 's_10_;s_11_;s_12_;s_13_;s_14_' | tr "\n" " "` )
+
+foreach i ( __15__ )
+  head -n $i pa5.tmp3 | __16__ > pa5.tmp4
+  switch ( __17__ )
+    case "L":
+      tail -1 pa5.tmp4 >> pa5.tmpL; breaksw
+    case "P":
+      tail -1 pa5.tmp4 >> pa5.tmpP; breaksw
+    case "F":
+      __18__ >> pa5.tmpC; breaksw
+    case "D":
+      echo "Error: the `__19__` flag requires a value."
+      exit 2
+    case "A":
+      __20__
+      if ( __21__ ) then
+        echo __22__
+        exit 2
+      endif
+      if ( __18__ == M ) then
+        set __23__ = M
+      else if ( __18__ == e ) then
+        set __23__ = e
+      else if ( __18__ == f ) then
+        set __23__ = f
+      else
+        set __23__ = X
+      endif
+      breaksw
+    case "M":
+      set MAX_LINES = `tail -1 pa5.tmp4`; breaksw
+    case "e":
+      __24__ >> pa5.tmpE; breaksw
+    case "f":
+      __24__|sed 's/-f//' >> pa5.tmpF; breaksw
+    default:
+      __24__ >> pa5.tmpL;
+  endsw
+end
+
+set F = `cat pa5.tmpC | tr __25__ | sed __26__`
+if ( __27__ ) then
+  echo __28__
+       
+  exit 2
+else if ( __29__ ) then
+  echo __30__
+
+  exit 2
+endif
+
+head -3 XLgrep | tail -1 > pa5.tmpX
+set NumOfExpressions = `__31__`
+if ( $NumOfExpressions > 1 ) then
+  echo __32__
+  exit 2
+else if ( $NumOfExpressions == 1 ) then
+  cat pa5.tmpE | sed 's/-e//' | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+else if ( __33__ ) then
+  head -1 pa5.tmpP | tr "\\" "%" | sed -f pa4.sed >> pa5.tmpX
+  tail -n `cat pa5.tmpP|wc -l|xargs expr __34__` pa5.tmpP > pa5.tmp7
+  mv pa5.tmp7 pa5.tmpP
+else
+  echo "Error: You must supply a regular expression."
+exit 2
+endif
+head -4 XLgrep | tail -1 >> pa5.tmpX
+cat pa5.tmpX | tr -d "\n" > pa5.sed
+
+cat pa5.tmpP >> pa5.tmpF
+set __35__ = __36__
+if ( __35__ > 1 ) then
+  echo "Error: XLgrep does not allow multiple filenames."
+  exit 2
+else if ( __35__ == 1 ) then
+  set filename = `cat pa5.tmpF`
+else
+  set filename = tempfile.in
+  __37__
+endif
+
+echo > pa5.tmp0
+cat $filename pa5.tmp0 pa5.tmp0 |sed -f pa5.sed | head -n `cat $filename | wc -l` pa5.tmp8
+set __38__ = __39__
+grep $F $__38__ -e __40__  -e "__41__" -e "__42__" pa5.tmp8
+
+exit
